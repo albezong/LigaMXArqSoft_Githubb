@@ -1,28 +1,29 @@
 <template>
   <v-app>
+    <nav-bar-view />
+
     <v-main>
-      <transition name="fade" mode="out-in">
-        <router-view />
-      </transition>
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import Login from '../src/views/Login/LoginView.vue'
+import NavBarView from '../src/views/NavBar/NavBarView.vue'
+
 export default {
   name: 'App',
   components: {
-    Login,
+    NavBarView,
   },
-  data: () => ({
-    //
-  }),
 };
 </script>
 
-<!-- <style scoped></style> -->
- <style>
+<style>
 .fade-enter-active, .fade-leave-active {
   transition: opacity .3s ease;
 }

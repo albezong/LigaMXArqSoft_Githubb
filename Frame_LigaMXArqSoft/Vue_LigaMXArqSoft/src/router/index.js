@@ -2,11 +2,17 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import LoginView from '../views/Login/LoginView.vue'
 import RegisterView from '../views/Register/RegisterView.vue'
+import GamesView from '../views/Games/GamesView.vue'
+//import JugadoresView from '../views/Jugadores/JugadoresView.vue' // <-- asegúrate que exista
 
 const routes = [
-  //{ path: '/', component: HomeView },
+  // Redirige "/" a "/login" o a donde quieras
+  { path: '/', redirect: '/login' },
+
+//  { path: '/jugadores', component: JugadoresView },
+  { path: '/registro', component: RegisterView },
   { path: '/login', component: LoginView },
-  { path: '/registerView', component: RegisterView },
+  { path: '/games', component: GamesView },
 ]
 
 const router = createRouter({
