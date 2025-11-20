@@ -1,201 +1,137 @@
 <template>
-    <v-app>
-        <v-main class="bg-grey-lighten-2">
+  <v-app>
+    <v-main class="basketball-bg">
+      <v-container 
+        class="d-flex justify-center align-center"
+        style="height: 100vh;"
+      >
+        <v-card width="420" elevation="12" class="pa-6 rounded-xl glass-card">
 
-            <v-container class="py-10" style="max-width: 600px;">
+          <!-- Encabezado con ícono -->
+          <div class="text-center mb-6">
+            <v-avatar size="90" color="orange darken-2" class="elevation-8">
+              <v-icon size="60" color="white">mdi-account-plus</v-icon>
+            </v-avatar>
 
-                <!-- TÍTULO -->
-                <h2 class="mb-2 d-flex justify-center align-center">Crea tu cuenta</h2>
-                <p class="text-grey mb-6 d-flex justify-center align-center">Completa los pasos para registrarte.</p>
+            <h2 class="mt-4 text-h5 font-weight-bold orange--text text--darken-2">
+              Crear Cuenta
+            </h2>
+            <p class="grey--text text--darken-1">
+              Únete al equipo y regístrate
+            </p>
+          </div>
 
-                <!-- BARRA DE PASOS -->
-                <div class="steps-container mb-6">
-                    <div v-for="n in 4" :key="n" class="step" :class="{
-                        active: step === n,
-                        complete: step > n
-                    }">
-                        {{ n }}
-                    </div>
-                </div>
+          <v-card-text>
+            <v-form ref="form" @submit.prevent="register">
 
-                <!-- ANIMACIÓN ENTRE PANTALLAS -->
-                <transition class="elevation-20 pt-8 mx-auto pa-12 color-fondoblanco" name="fade-slide" mode="out-in">
-                    <div :key="step">
+              <v-text-field
+                v-model="username"
+                label="Usuario"
+                outlined
+                rounded
+                dense
+                color="orange darken-2"
+                prepend-inner-icon="mdi-account"
+                required
+              />
 
-                        <!-- -------------- PANTALLA 1 ------------------ -->
-                        <div v-if="step === 1" class="color-circunferencia">
-                            <v-text-field label="Nombre" v-model="form.nombre" outlined />
-                            <v-text-field label="Email" v-model="form.email" outlined />
+              <v-text-field
+                v-model="password"
+                label="Contraseña"
+                type="password"
+                outlined
+                rounded
+                dense
+                color="orange darken-2"
+                prepend-inner-icon="mdi-lock"
+                required
+              />
 
-                            <v-btn color="primary" block class="mt-4" rounded="xl" @click="goNext">
-                                Siguiente →
-                            </v-btn>
-                        </div>
+              <v-text-field
+                v-model="confirmPassword"
+                label="Confirmar Contraseña"
+                type="password"
+                outlined
+                rounded
+                dense
+                color="orange darken-2"
+                prepend-inner-icon="mdi-lock-check"
+                required
+              />
 
-                        <!-- -------------- PANTALLA 2 ------------------ -->
-                        <div v-else-if="step === 2">
-                            <h3 class="text-white mb-4">¿Qué estilo de jugador eres?</h3>
+              <!-- Mensaje de error -->
+              <div class="text-center mt-2" v-if="errorMessage">
+                <span class="red--text font-weight-bold">{{ errorMessage }}</span>
+              </div>
 
-                            <v-card :elevation="form.jugadorTipo === 'Ofensivo' ? 12 : 2"
-                                class="pa-4 my-2 selectable-card" @click="form.jugadorTipo = 'Ofensivo'">
-                                <strong>Ofensivo</strong>
-                                <div class="text-grey">Te gusta encestar y atacar.</div>
-                            </v-card>
+              <v-btn 
+                type="submit"
+                color="orange darken-2"
+                dark
+                large
+                rounded
+                block
+                class="mt-4"
+              >
+                Registrar
+              </v-btn>
 
-                            <v-card :elevation="form.jugadorTipo === 'Defensivo' ? 12 : 2"
-                                class="pa-4 my-2 selectable-card" @click="form.jugadorTipo = 'Defensivo'">
-                                <strong>Defensivo</strong>
-                                <div class="text-grey">Bloqueos, robos y defensa.</div>
-                            </v-card>
+            </v-form>
 
-                            <!-- Botones -->
-                            <v-row class="mt-4">
-                                <v-col cols="6">
-                                    <v-btn variant="tonal" block @click="goBack">← Atrás</v-btn>
-                                </v-col>
+            <!-- Volver a login -->
+            <div class="text-center mt-6">
+              <span class="grey--text text--darken-1">¿Ya tienes cuenta?</span>
+              <br />
+              <a href="/login" class="orange--text font-weight-bold">
+                Iniciar sesión
+              </a>
+            </div>
 
-                                <v-col cols="6">
-                                    <v-btn color="primary" block @click="goNext">Siguiente →</v-btn>
-                                </v-col>
-                            </v-row>
-                        </div>
+          </v-card-text>
 
-                        <!-- -------------- PANTALLA 3 ------------------ -->
-                        <div v-else-if="step === 3">
-                            <v-select label="Rol" v-model="form.rol" :items="['Jugador', 'Entrenador', 'Aficionado']"
-                                outlined />
-                            <v-text-field label="Contraseña" v-model="form.contraseña" type="password" outlined />
-
-                            <!-- Botones -->
-                            <v-row class="mt-4">
-                                <v-col cols="6">
-                                    <v-btn variant="tonal" block @click="goBack">← Atrás</v-btn>
-                                </v-col>
-
-                                <v-col cols="6">
-                                    <v-btn color="primary" block @click="goNext">Siguiente →</v-btn>
-                                </v-col>
-                            </v-row>
-                        </div>
-
-                        <!-- -------------- PANTALLA 4 ------------------ -->
-                        <div v-else-if="step === 4">
-                            <h3 class="text-white">Confirmación</h3>
-                            <p><strong>Nombre:</strong> {{ form.nombre }}</p>
-                            <p><strong>Email:</strong> {{ form.email }}</p>
-                            <p><strong>Tipo jugador:</strong> {{ form.jugadorTipo }}</p>
-                            <p><strong>Rol:</strong> {{ form.rol }}</p>
-
-                            <v-row class="mt-4">
-                                <v-col cols="6">
-                                    <v-btn variant="tonal" block @click="goBack">← Atrás</v-btn>
-                                </v-col>
-
-                                <v-col cols="6">
-                                    <v-btn color="primary" block @click="register">Crear cuenta ✔</v-btn>
-                                </v-col>
-                            </v-row>
-                        </div>
-                    </div>
-                </transition>
-
-            </v-container>
-        </v-main>
-    </v-app>
+        </v-card>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
 export default {
-    data() {
-        return {
-            step: 1,
-            form: {
-                nombre: "",
-                email: "",
-                contraseña: "",
-                rol: "",
-                jugadorTipo: ""
-            }
-        };
-    },
-
-    methods: {
-        goNext() {
-            if (this.step < 4) this.step++;
-        },
-        goBack() {
-            if (this.step > 1) this.step--;
-        },
-        register() {
-            alert("Registro completo");
-            console.log("Datos:", this.form);
-        }
+  name: "RegisterView",
+  data() {
+    return {
+      username: "",
+      password: "",
+      confirmPassword: "",
+      errorMessage: ""
+    };
+  },
+  methods: {
+    register() {
+      if (this.password === this.confirmPassword) {
+        console.log("User registered:", this.username);
+        this.errorMessage = "";
+        this.$refs.form.reset();
+      } else {
+        this.errorMessage = "Las contraseñas no coinciden.";
+      }
     }
+  }
 };
 </script>
 
 <style scoped>
-.text-grey {
-    color: #aaaaaa;
+/* Fondo tipo cancha de basquetbol */
+.basketball-bg {
+  background-image: url('@/img/fondo3.jpeg');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.9);
 }
 
-.color-circunferencia {
-    color: #000000;
-}
-
-.color-fondoblanco {
-    background-color: #ffffff;
-}
-
-/* ---- STEPS ---- */
-.steps-container {
-    display: flex;
-    justify-content: space-between;
-}
-
-.step {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #64645f;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.3s;
-    border: 2px solid #555;
-}
-
-.step.active {
-    background-color: #af1a29;
-    border-color: #000;
-}
-
-.step.complete {
-    background-color: #4caf50;
-    border-color: #000;
-}
-
-/* ---- ANIMACIÓN ENTRE PANTALLAS ---- */
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-    transition: all 0.35s ease;
-}
-
-.fade-slide-enter-from {
-    opacity: 0;
-    transform: translateX(20px);
-}
-
-.fade-slide-leave-to {
-    opacity: 0;
-    transform: translateX(-20px);
-}
-
-/* Cartas seleccionables */
-.selectable-card:hover {
-    cursor: pointer;
-    transform: scale(1.02);
-    transition: 0.2s;
+/* Efecto glass moderno */
+.glass-card {
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.85) !important;
 }
 </style>
