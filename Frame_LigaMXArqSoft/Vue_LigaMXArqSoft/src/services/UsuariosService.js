@@ -1,26 +1,36 @@
 import api from './api'
 
 // Obtener todos los usuarios
-export const getUsuarios = () =>
-  api.get('/ApiLiga/Obtener/Usuarios')
-     .then(r => r.data.data)
+export const getUsuarios = async () => {
+  const r = await api.get('/ApiLiga/Obtener/Usuarios')
+  console.log("API USUARIOS RESPUESTA:", r.data)
+  return r.data
+}
 
 // Obtener usuario por ID
-export const getUsuarioById = (id) =>
-  api.get(`/ApiLiga/Obtener/UsuariosById/${id}`)
-     .then(r => r.data.data)
+export const getUsuarioById = async (id) => {
+  const r = await api.get(`/ApiLiga/Obtener/UsuariosById/${id}`)
+  console.log("API USUARIO POR ID RESPUESTA:", r.data)
+  return r.data
+}
 
 // Crear usuario
-export const crearUsuario = (usuario) =>
-  api.post('/ApiLiga/Insertar/Usuario', usuario)
-     .then(r => r.data.data)
+export const crearUsuario = async (usuario) => {
+  const r = await api.post('/ApiLiga/Insertar/Usuario', usuario)
+  console.log("API CREAR USUARIO RESPUESTA:", r.data)
+  return r.data
+}
 
 // Actualizar usuario
-export const actualizarUsuario = (id, usuario) =>
-  api.put(`/ApiLiga/Actualizar/Usuario/${id}`, usuario)
-     .then(r => r.data.data)
+export const actualizarUsuario = async (id, usuario) => {
+  const r = await api.put(`/ApiLiga/Actualizar/Usuario/${id}`, usuario)
+  console.log("API ACTUALIZAR USUARIO RESPUESTA:", r.data)
+  return r.data
+}
 
 // Eliminar usuario
-export const eliminarUsuario = (id) =>
-  api.delete(`/ApiLiga/Eliminar/Usuario/${id}`)
-     .then(r => r.data)
+export const eliminarUsuario = async (id) => {
+  const r = await api.delete(`/ApiLiga/Eliminar/Usuario/${id}`)
+  console.log("API ELIMINAR USUARIO RESPUESTA:", r.data)
+  return r.data
+}

@@ -1,14 +1,17 @@
 // src/stores/usuariosStore.js
 import { defineStore } from 'pinia'
 import * as svc from '../services/UsuariosService'
+import router from '../router'   // <-- IMPORTANTE para redirigir
 
 export const useUsuariosStore = defineStore('usuarios', {
   state: () => ({
     items: [],
-    selected: null,   // usuario seleccionado por id
+    selected: null,
     loading: false,
-    error: null
+    error: null,
+    authUser: null    // usuario logueado
   }),
+
   actions: {
     async fetchAll() {
       this.loading = true
@@ -22,12 +25,46 @@ export const useUsuariosStore = defineStore('usuarios', {
       }
     },
 
+    async login(email, password) {
+      this.loading = true
+      this.error = null
+      try {
+        // 1. Cargar todos los usuarios
+        const usuarios = await svc.getUsuarios()
+
+        // 2. Buscar coincidencia
+        const user = usuarios.find(
+          u => u.Email === email && u.Contraseña === password
+        )
+
+        // 3. Validar
+        if (!user) {
+          this.error = 'Usuario o contraseña incorrectos'
+          return false
+        }
+
+        // 4. Guardar usuario autenticado
+        this.authUser = user
+
+        // 5. Redirigir a /games
+        router.push('/games')
+
+        return true
+
+      } catch (e) {
+        this.error = 'Error al iniciar sesión'
+        return false
+      } finally {
+        this.loading = false
+      }
+    },
+
     async fetchById(id) {
       this.loading = true
       this.error = null
       try {
         this.selected = await svc.getUsuarioById(id)
-        return this.selected // por si quieres usar el valor directamente
+        return this.selected
       } catch (e) {
         this.error = e
         this.selected = null

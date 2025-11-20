@@ -123,7 +123,7 @@ export default {
 <style scoped>
 /* Fondo tipo cancha de basquetbol */
 .basketball-bg {
-  background-image: url('@/img/fondo3.jpeg');
+  background-image: url('../../img/fondo3.jpeg');
   background-size: cover;
   background-position: center;
   filter: brightness(0.9);

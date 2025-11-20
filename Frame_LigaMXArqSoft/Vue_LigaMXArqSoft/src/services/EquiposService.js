@@ -1,26 +1,36 @@
 import api from './api'
 
 // Obtener todos los equipos
-export const getEquipos = () =>
-  api.get('/ApiLiga/Obtener/equipos')
-     .then(r => r.data.data)
+export const getEquipos = async () => {
+  const r = await api.get('/ApiLiga/Obtener/equipos')
+  console.log("API EQUIPOS RESPUESTA:", r.data)
+  return r.data
+}
 
 // Obtener equipo por ID
-export const getEquipoById = (id) =>
-  api.get(`/ApiLiga/Obtener/EquiposById/${id}`)
-     .then(r => r.data.data)
+export const getEquipoById = async (id) => {
+  const r = await api.get(`/ApiLiga/Obtener/EquiposById/${id}`)
+  console.log("API EQUIPO POR ID RESPUESTA:", r.data)
+  return r.data
+}
 
-// Crear un nuevo equipo
-export const crearEquipo = (equipo) =>
-  api.post('/ApiLiga/Insertar/Equipo', equipo)
-     .then(r => r.data.data)
+// Crear equipo
+export const crearEquipo = async (equipo) => {
+  const r = await api.post('/ApiLiga/Insertar/Equipo', equipo)
+  console.log("API CREAR EQUIPO RESPUESTA:", r.data)
+  return r.data
+}
 
-// Actualizar un equipo existente
-export const actualizarEquipo = (id, equipo) =>
-  api.put(`/ApiLiga/Actualizar/Equipo/${id}`, equipo)
-     .then(r => r.data.data)
+// Actualizar equipo
+export const actualizarEquipo = async (id, equipo) => {
+  const r = await api.put(`/ApiLiga/Actualizar/Equipo/${id}`, equipo)
+  console.log("API ACTUALIZAR EQUIPO RESPUESTA:", r.data)
+  return r.data
+}
 
-// Eliminar un equipo
-export const eliminarEquipo = (id) =>
-  api.delete(`/ApiLiga/Eliminar/Equipo/${id}`)
-     .then(r => r.data)
+// Eliminar equipo
+export const eliminarEquipo = async (id) => {
+  const r = await api.delete(`/ApiLiga/Eliminar/Equipo/${id}`)
+  console.log("API ELIMINAR EQUIPO RESPUESTA:", r.data)
+  return r.data
+}

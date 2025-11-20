@@ -1,26 +1,36 @@
 import api from './api'
 
 // Obtener todos los entrenadores
-export const getEntrenadores = () =>
-  api.get('/ApiLiga/Obtener/Entrenadores')
-     .then(r => r.data.data)
+export const getEntrenadores = async () => {
+  const r = await api.get('/ApiLiga/Obtener/Entrenadores')
+  console.log("API ENTRENADORES RESPUESTA:", r.data)
+  return r.data
+}
 
 // Obtener entrenador por ID
-export const getEntrenadorById = (id) =>
-  api.get(`/ApiLiga/Obtener/EntrenadoresId/${id}`)
-     .then(r => r.data.data)
+export const getEntrenadorById = async (id) => {
+  const r = await api.get(`/ApiLiga/Obtener/EntrenadoresId/${id}`)
+  console.log("API ENTRENADOR POR ID RESPUESTA:", r.data)
+  return r.data
+}
 
-// Crear un nuevo entrenador
-export const crearEntrenador = (entrenador) =>
-  api.post('/ApiLiga/Insertar/Entrenador', entrenador)
-     .then(r => r.data.data)
+// Crear entrenador
+export const crearEntrenador = async (entrenador) => {
+  const r = await api.post('/ApiLiga/Insertar/Entrenador', entrenador)
+  console.log("API CREAR ENTRENADOR RESPUESTA:", r.data)
+  return r.data
+}
 
-// Actualizar un entrenador existente
-export const actualizarEntrenador = (id, entrenador) =>
-  api.put(`/ApiLiga/Actualizar/Entrenador/${id}`, entrenador)
-     .then(r => r.data.data)
+// Actualizar entrenador
+export const actualizarEntrenador = async (id, entrenador) => {
+  const r = await api.put(`/ApiLiga/Actualizar/Entrenador/${id}`, entrenador)
+  console.log("API ACTUALIZAR ENTRENADOR RESPUESTA:", r.data)
+  return r.data
+}
 
-// Eliminar un entrenador
-export const eliminarEntrenador = (id) =>
-  api.delete(`/ApiLiga/Eliminar/Entrenador/${id}`)
-     .then(r => r.data)
+// Eliminar entrenador
+export const eliminarEntrenador = async (id) => {
+  const r = await api.delete(`/ApiLiga/Eliminar/Entrenador/${id}`)
+  console.log("API ELIMINAR ENTRENADOR RESPUESTA:", r.data)
+  return r.data
+}
