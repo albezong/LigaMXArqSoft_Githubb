@@ -95,7 +95,7 @@ export default {
 <style scoped>
 /* Fondo tipo cancha de basquet */
 .basketball-bg {
-  background: url('https://i.imgur.com/bjx6w2C.png');
+  background-image: url('@/img/fondo1.jpeg');
   background-size: cover;
   background-position: center;
   filter: brightness(0.9);
