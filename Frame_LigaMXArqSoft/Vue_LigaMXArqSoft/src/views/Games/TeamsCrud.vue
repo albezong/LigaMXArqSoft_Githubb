@@ -1,160 +1,181 @@
 <template>
   <v-app>
     <v-main>
-      <v-container>
+      <v-container class="py-10">
 
-        <h1 class="text-h4 font-weight-bold mb-6">Gestión de Equipos</h1>
+        <!-- TÍTULO -->
+        <h2 class="text-h4 font-weight-bold mb-6">Equipos</h2>
 
-        <!-- FORMULARIO PARA AÑADIR / EDITAR -->
-        <v-card elevation="8" class="pa-4 mb-6">
-          <h3 class="text-h6 font-weight-bold mb-4">
-            {{ editIndex === -1 ? "Agregar Equipo" : "Editar Equipo" }}
-          </h3>
+        <!-- BOTÓN NUEVO -->
+        <v-btn color="green" class="mb-6" @click="abrirNuevo">
+          Nuevo Equipo
+        </v-btn>
 
-          <v-form @submit.prevent="saveTeam">
+        <!-- LISTA DE TARJETAS -->
+        <v-row dense>
+          <v-col
+            v-for="team in teams"
+            :key="team.Id"
+            cols="12"
+            sm="6"
+            md="4"
+            lg="3"
+          >
+            <v-card elevation="6" class="pa-4">
+
+              <!-- AVATAR -->
+              <div class="d-flex justify-center mb-4">
+                <v-avatar size="50" color="grey lighten-2">
+                  <span class="text-h6">
+                    {{ team.Nombre?.charAt(0) }}
+                  </span>
+                </v-avatar>
+              </div>
+
+              <!-- NOMBRE -->
+              <h3 class="text-h6 text-center font-weight-bold mb-1">
+                {{ team.Nombre }}
+              </h3>
+
+              <!-- CIUDAD -->
+              <p class="text-center text-caption mb-4">
+                {{ team.Ciudad }}
+              </p>
+
+              <!-- BOTONES -->
+              <div class="d-flex justify-center">
+                <v-btn small color="blue darken-2" class="mx-1" @click="abrirEditar(team.Id)">
+                  <v-icon small>mdi-pencil</v-icon>
+                </v-btn>
+
+                <v-btn small color="red darken-2" class="mx-1" @click="eliminarEquipo(team.Id, team.Nombre)">
+                  <v-icon small>mdi-delete</v-icon>
+                </v-btn>
+              </div>
+
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <!-- FORMULARIO EN DIÁLOGO -->
+        <v-dialog v-model="dialog" max-width="500">
+          <v-card class="pa-4">
+
+            <h3 class="text-h6 font-weight-bold mb-4">
+              {{ modoEdicion ? "Editar Equipo" : "Nuevo Equipo" }}
+            </h3>
 
             <v-text-field
-              v-model="form.city"
+              label="Nombre"
+              v-model="form.Nombre"
+              variant="outlined"
+              class="mb-3"
+            />
+
+            <v-text-field
               label="Ciudad"
-              prepend-inner-icon="mdi-city"
-              required
+              v-model="form.Ciudad"
+              variant="outlined"
+              class="mb-3"
             />
 
             <v-text-field
-              v-model="form.team"
-              label="Equipo"
-              prepend-inner-icon="mdi-basketball"
-              required
+              label="Usuario ID"
+              type="number"
+              v-model="form.UsuarioId"
+              variant="outlined"
+              class="mb-3"
             />
 
-            <v-btn type="submit" color="primary" class="mt-3">
-              {{ editIndex === -1 ? "Agregar" : "Guardar Cambios" }}
-            </v-btn>
+            <v-card-actions class="d-flex justify-end">
+              <v-btn color="grey" @click="cerrarDialog">Cancelar</v-btn>
+              <v-btn color="green" @click="guardarEquipo">Guardar</v-btn>
+            </v-card-actions>
 
-            <v-btn
-              v-if="editIndex !== -1"
-              class="mt-3 ml-3"
-              color="grey"
-              @click="cancelEdit"
-            >
-              Cancelar
-            </v-btn>
-          </v-form>
-        </v-card>
-
-        <!-- TABLA DE EQUIPOS -->
-        <v-card elevation="8" class="pa-4">
-          <h3 class="text-h6 font-weight-bold mb-4">Lista de Equipos</h3>
-
-          <v-table>
-            <thead>
-              <tr>
-                <th>Ciudad</th>
-                <th>Equipo</th>
-                <th class="text-center">Acciones</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr v-for="(team, index) in teams" :key="index">
-                <td>{{ team.city }}</td>
-                <td>{{ team.team }}</td>
-
-                <td class="text-center">
-                  <v-btn
-                    size="small"
-                    color="blue"
-                    @click="editTeam(index)"
-                    class="mr-2"
-                  >
-                    Editar
-                  </v-btn>
-
-                  <v-btn
-                    size="small"
-                    color="red"
-                    @click="deleteTeam(index)"
-                  >
-                    Eliminar
-                  </v-btn>
-                </td>
-              </tr>
-            </tbody>
-          </v-table>
-        </v-card>
+          </v-card>
+        </v-dialog>
 
       </v-container>
     </v-main>
   </v-app>
 </template>
 
-<script>
-export default {
-  name: "TeamsCRUD",
 
-  data() {
-    return {
-      // LISTA DE EQUIPOS
-      teams: [
-        { city: "Boston", team: "Celtics" },
-        { city: "Toronto", team: "Raptors" },
-        { city: "Chicago", team: "Bulls" },
-        { city: "San Francisco", team: "Warriors" },
-        { city: "Minnesota", team: "Wolves" }
-      ],
+<script setup>
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-      // FORMULARIO
-      form: {
-        city: "",
-        team: ""
-      },
+const teams = ref([])
+const dialog = ref(false)
+const modoEdicion = ref(false)
 
-      editIndex: -1
-    };
-  },
+const form = ref({
+  Id: 0,
+  Nombre: "",
+  Ciudad: "",
+  UsuarioId: 0
+})
 
-  methods: {
-    saveTeam() {
-      if (!this.form.city || !this.form.team) return;
+/* ─────────────────────────────────────────────
+   CARGAR EQUIPOS
+───────────────────────────────────────────────*/
+async function cargarEquipos() {
+  const { data } = await axios.get("http://localhost:49986/ApiLiga/Obtener/Equipos")
+  teams.value = data
+}
 
-      // AGREGAR
-      if (this.editIndex === -1) {
-        this.teams.push({
-          city: this.form.city,
-          team: this.form.team
-        });
-      }
-      // EDITAR
-      else {
-        this.teams[this.editIndex].city = this.form.city;
-        this.teams[this.editIndex].team = this.form.team;
-      }
+/* ─────────────────────────────────────────────
+   ABRIR NUEVO
+───────────────────────────────────────────────*/
+function abrirNuevo() {
+  modoEdicion.value = false
+  form.value = { Id: 0, Nombre: "", Ciudad: "", UsuarioId: 0 }
+  dialog.value = true
+}
 
-      this.resetForm();
-    },
+/* ─────────────────────────────────────────────
+   ABRIR EDITAR
+───────────────────────────────────────────────*/
+async function abrirEditar(id) {
+  const { data } = await axios.get(`http://localhost:49986/ApiLiga/Obtener/EquiposById?id=${id}`)
+  form.value = { ...data }
+  modoEdicion.value = true
+  dialog.value = true
+}
 
-    deleteTeam(index) {
-      this.teams.splice(index, 1);
-    },
-
-    editTeam(index) {
-      this.editIndex = index;
-      this.form.city = this.teams[index].city;
-      this.form.team = this.teams[index].team;
-    },
-
-    cancelEdit() {
-      this.resetForm();
-    },
-
-    resetForm() {
-      this.form.city = "";
-      this.form.team = "";
-      this.editIndex = -1;
-    }
+/* ─────────────────────────────────────────────
+   GUARDAR
+───────────────────────────────────────────────*/
+async function guardarEquipo() {
+  if (modoEdicion.value) {
+    await axios.put(
+      `http://localhost:49986/ApiLiga/Actualizar/Equipo/${form.value.Id}`,
+      form.value
+    )
+  } else {
+    await axios.post(
+      "http://localhost:49986/ApiLiga/Insertar/Equipo",
+      form.value
+    )
   }
-};
-</script>
 
-<style scoped>
-</style>
+  dialog.value = false
+  cargarEquipos()
+}
+
+/* ─────────────────────────────────────────────
+   ELIMINAR
+───────────────────────────────────────────────*/
+async function eliminarEquipo(id, nombre) {
+  if (!confirm(`¿Eliminar el equipo ${nombre}?`)) return;
+
+  await axios.delete(`http://localhost:49986/ApiLiga/Eliminar/Equipo/${id}`)
+  cargarEquipos()
+}
+
+function cerrarDialog() {
+  dialog.value = false
+}
+
+onMounted(cargarEquipos)
+</script>
