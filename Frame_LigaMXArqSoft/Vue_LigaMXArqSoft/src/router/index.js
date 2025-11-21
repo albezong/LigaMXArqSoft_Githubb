@@ -17,14 +17,14 @@ const routes = [
   { path: "/registro", component: RegisterView },
   { path: "/login", component: LoginView },
 
-  // 🔐 Rutas protegidas
-  //{ path: "/games", component: GamesView, meta: { requiresAuth: true } },
-  { path: "/games", component: GamesView },
+  //Rutas protegidas
+  { path: "/games", component: GamesView, meta: { requiresAuth: true } },
+  //{ path: "/games", component: GamesView },
   { path: "/teams", component: TeamsView, meta: { requiresAuth: true } },
   { path: "/standings", component: StandingsView, meta: { requiresAuth: true } },
   { path: "/player", component: PlayerView, meta: { requiresAuth: true } },
 
-  // 🔐 CRUDs también protegidos
+  //CRUDs también protegidos
   { path: "/playerscrud", component: PlayersCrud, meta: { requiresAuth: true } },
   { path: "/teamscrud", component: TeamsCrud, meta: { requiresAuth: true } },
   { path: "/update", component: UpdateEquipoView, meta: { requiresAuth: true } },
@@ -36,7 +36,7 @@ const router = createRouter({
 });
 
 // ----------------------------------------------------------
-// 🔒 BLOQUEAR ACCESO A RUTAS PROTEGIDAS
+//BLOQUEAR ACCESO A RUTAS PROTEGIDAS
 // ----------------------------------------------------------
 router.beforeEach((to, from, next) => {
   const userStore = useUsuariosStore();
