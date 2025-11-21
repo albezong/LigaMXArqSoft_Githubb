@@ -85,7 +85,8 @@
             <p class="text-white mb-4">
               Your courtside seat to every game.
             </p>
-            <v-btn color="yellow-darken-2" size="large">Sign Up Now</v-btn>
+
+            <v-btn color="yellow-darken-2" size="large" to="/registro">Sign Up Now</v-btn>
           </div>
         </v-img>
       </v-col>

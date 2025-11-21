@@ -61,7 +61,7 @@
             <div class="text-center mt-6">
               <span class="grey--text text--darken-1">¿No tienes cuenta?</span>
               <br />
-              <RouterLink to="/registerView" class="orange--text font-weight-bold">
+              <RouterLink to="/registro" class="orange--text font-weight-bold">
                 Crear cuenta
               </RouterLink>
             </div>
