@@ -19,6 +19,7 @@ const routes = [
   { path: "/login", component: LoginView },
 
   //Rutas protegidas
+  { path: "/games", component: GamesView, /*meta: { requiresAuth: true } */},
   //{ path: "/games", component: GamesView },
   { path: "/teams", component: TeamsView, /*meta: { requiresAuth: true } */},
   { path: "/standings", component: StandingsView, /*meta: { requiresAuth: true } */},
