@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import * as svc from '../services/jugadores' // 👈 importa tu servicio de jugadores
+import * as svc from '../services/JugadoresService' // 👈 importa tu servicio de jugadores
 
 export const useJugadoresStore = defineStore('jugadores', {
   state: () => ({

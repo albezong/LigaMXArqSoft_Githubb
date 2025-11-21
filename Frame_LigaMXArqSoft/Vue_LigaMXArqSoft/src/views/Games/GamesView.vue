@@ -23,7 +23,7 @@
 
       <div class="d-flex justify-space-around">
         <div v-for="day in weekDays" :key="day.date" class="text-center px-3 py-2 day-item"
-          :class="{ active: day.isToday }" @click="selectDay(day)">
+          :class="{ active: day.isActive }" @click="selectDay(day)">
           <p class="text-caption">{{ day.weekday }}</p>
           <p class="font-weight-bold">{{ day.day }}</p>
           <p class="text-caption" v-if="day.games > 0">{{ day.games }} juegos</p>
@@ -43,23 +43,40 @@
           <v-row>
 
             <!-- EQUIPOS -->
-            <v-col cols="12" md="4" class="text-center border-right">
-              <img :src="game.teamA.logo" width="60" />
-              <p class="equipo-nombre">{{ game.teamA.name }}</p>
+            <v-col cols="12" md="8" class="text-center border-right">
+              <v-row align="center" justify="center" class="mb-2">
+                <!-- Equipo A -->
+                <v-col cols="4" class="text-center">
+                  <img :src="game.teamA.logo" width="60" />
+                  <p class="equipo-nombre">{{ game.teamA.name }}</p>
+                </v-col>
 
-              <h2 class="hora">{{ game.time }} CT</h2>
+                <!-- Hora -->
+                <v-col cols="2" class="text-center">
+                  vs
+                  <h2 class="hora">{{ game.time }} CT</h2>
+                </v-col>
 
-              <img :src="game.teamB.logo" width="60" />
-              <p class="equipo-nombre">{{ game.teamB.name }}</p>
+                <!-- Equipo B -->
+                <v-col cols="4" class="text-center">
+                  <img :src="game.teamB.logo" width="60" />
+                  <p class="equipo-nombre">{{ game.teamB.name }}</p>
+                </v-col>
+              </v-row>
 
-              <v-btn class="mt-3" variant="outlined">Vista Previa</v-btn>
-              <v-btn class="mt-3 mx-2" color="primary">Entradas</v-btn>
+              <!-- Botones -->
+              <v-row justify="center" class="mt-2">
+                <v-btn variant="outlined">Vista Previa</v-btn>
+                <v-btn class="mx-2" color="primary">Entradas</v-btn>
+              </v-row>
 
-              <p class="liga-pass">Pase de la liga</p>
+              <p class="liga-pass mt-2">Pase de la liga</p>
             </v-col>
 
+
+
             <!-- LÍDERES -->
-            <v-col cols="12" md="8">
+            <v-col cols="12" md="">
               <h3 class="subtitulo">Líderes de la Temporada</h3>
 
               <div v-for="leader in game.leaders" :key="leader.name" class="leader-item">
@@ -96,10 +113,10 @@
   </v-container>
 </template>
 
-
 <script>
-import { onMounted, reactive, watch } from "vue";
+import { onMounted, watch } from "vue";
 import { usePartidosStore } from "../../stores/PartidosStore";
+import { useJugadoresStore } from "../../stores/JugadoresStore";
 
 export default {
   data() {
@@ -121,54 +138,26 @@ export default {
 
   setup() {
     const partidosStore = usePartidosStore();
-    return { partidosStore };
+    const jugadoresStore = useJugadoresStore();
+    return { partidosStore, jugadoresStore };
   },
 
   mounted() {
-    // cargar partidos desde la API
-    this.partidosStore.fetchAll();
-
-    // generar la semana
-    this.generateWeekDays(this.selectedDate);
+    // Traer jugadores primero para tener logos listos
+    this.jugadoresStore.fetchAll().then(() => {
+      // Cargar partidos después
+      this.partidosStore.fetchAll().then(() => {
+        this.filterGamesBySelectedDate();
+        this.generateWeekDays(this.selectedDate);
+      });
+    });
 
     // observar cambios y actualizar "games"
     watch(
       () => this.partidosStore.partidos,
-      (lista) => {
-
-        if (!Array.isArray(lista)) {
-          this.games = [];
-          return;
-        }
-
-        this.games = lista.map((p) => ({
-          id: p.Id,
-          fecha: p.Fecha,
-          time: p.Fecha?.split("T")[1]?.substring(0, 5) || "Por definir",
-
-          teamA: {
-            name: "Equipo " + p.Equipolocal,
-            logo: "https://via.placeholder.com/50?text=" + p.Equipolocal,
-            record: "0-0",
-          },
-
-          teamB: {
-            name: "Equipo " + p.EquipoVisitante,
-            logo: "https://via.placeholder.com/50?text=" + p.EquipoVisitante,
-            record: "0-0",
-          },
-
-          leaders: [],
-        }));
-
-        this.generateWeekDays(this.selectedDate);
-
-      },
+      () => this.filterGamesBySelectedDate(),
       { immediate: true }
     );
-
-
-
   },
 
   methods: {
@@ -186,12 +175,12 @@ export default {
       this.weekDays = Array.from({ length: 7 }, (_, i) => {
         const date = new Date(startOfWeek);
         date.setDate(startOfWeek.getDate() + i);
-
         return {
           date,
           day: date.getDate(),
           weekday: date.toLocaleDateString("es-MX", { weekday: "short" }),
           isToday: this.isSameDay(date, new Date()),
+          isActive: this.isSameDay(date, this.selectedDate),
           games: this.getGamesForDate(date),
         };
       });
@@ -207,10 +196,7 @@ export default {
 
     getGamesForDate(date) {
       const key = date.toISOString().split("T")[0];
-      const partidosEnFecha = this.games.filter(
-        (g) => g.fecha.split("T")[0] === key
-      );
-      return partidosEnFecha.length;
+      return this.games.filter(g => g.fecha.split("T")[0] === key).length;
     },
 
     prevWeek() {
@@ -225,7 +211,57 @@ export default {
 
     selectDay(day) {
       this.selectedDate = new Date(day.date);
+      this.filterGamesBySelectedDate();
+      this.generateWeekDays(this.selectedDate);
     },
+
+    filterGamesBySelectedDate() {
+      // Filtrar partidos por fecha
+      const partidosFiltrados = this.partidosStore.partidos.filter(p => {
+        const gameDate = new Date(p.Fecha);
+        return (
+          gameDate.getDate() === this.selectedDate.getDate() &&
+          gameDate.getMonth() === this.selectedDate.getMonth() &&
+          gameDate.getFullYear() === this.selectedDate.getFullYear()
+        );
+      });
+
+      // Mapear a formato de games incluyendo logos de jugadores/equipos
+      this.games = partidosFiltrados.map(p => {
+        // Buscar logo de equipo local y visitante en jugadoresStore
+        const jugadorLocal = this.jugadoresStore.jugadores.find(
+          j => j.Nombre === "Logo" && j.EquipoId === p.Equipolocal
+        );
+        const jugadorVisitante = this.jugadoresStore.jugadores.find(
+          j => j.Nombre === "Logo" && j.EquipoId === p.EquipoVisitante
+        );
+
+        return {
+          id: p.Id,
+          fecha: p.Fecha,
+          time: new Date(p.Fecha).toLocaleTimeString("es-MX", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          teamA: {
+            name: "Equipo " + p.Equipolocal,
+            logo: jugadorLocal?.imagenURL
+              ? `data:image/png;base64,${jugadorLocal.imagenURL}`
+              : '/img/leaguePass.webp',
+            record: "0-0",
+          },
+          teamB: {
+            name: "Equipo " + p.EquipoVisitante,
+            logo: jugadorVisitante?.imagenURL
+              ? `data:image/png;base64,${jugadorVisitante.imagenURL}`
+              : '/img/leaguePass.webp',
+            record: "0-0",
+          },
+          leaders: [],
+        };
+      });
+    }
+
   },
 };
 </script>
@@ -233,6 +269,12 @@ export default {
 
 
 <style scoped>
+.day-item.active {
+  background-color: black;
+  color: white;
+  border-radius: 8px;
+}
+
 .pagina-partidos {
   background-color: #f7f8fa;
   min-height: 100vh;
