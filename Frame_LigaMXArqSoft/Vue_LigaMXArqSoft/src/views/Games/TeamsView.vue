@@ -35,20 +35,7 @@
                 {{ team.Ciudad }}
               </p>
 
-              <!-- Botones -->
-              <div class="d-flex justify-center">
-                <v-btn small color="primary" class="mx-1" :href="`/equipos/${team.Id}`">
-                  Perfil
-                </v-btn>
-
-                <v-btn small color="blue darken-2" class="mx-1" @click="editTeam(team)">
-                  <v-icon small>mdi-pencil</v-icon>
-                </v-btn>
-
-                <v-btn small color="red darken-2" class="mx-1" @click="deleteTeam(team)">
-                  <v-icon small>mdi-delete</v-icon>
-                </v-btn>
-              </div>
+              
 
             </v-card>
           </v-col>
