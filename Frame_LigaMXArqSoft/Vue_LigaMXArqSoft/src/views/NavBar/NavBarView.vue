@@ -49,6 +49,12 @@ export default {
                 // { text: "Jugadores", to: "/jugadores", icon: "mdi-basketball" },
                 { text: "Registro", to: "/registro", icon: "mdi-account-plus" },
                 { text: "Login", to: "/login", icon: "mdi-login" },
+                { text: "Partidos", to: "/games", icon: "mdi-basketball" },
+                { text: "Posiciones", to: "/standings", icon: "mdi-login" },
+                { text: "Jugadores", to: "/playerscrud", icon: "mdi-login" },
+                { text: "Equipos", to: "/teams", icon: "mdi-team" },
+                { text: "Gestión de Equipos", to: "/teamscrud", icon: "mdi-login" },
+                
             ],
         };
     },
