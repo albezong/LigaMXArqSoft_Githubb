@@ -63,62 +63,6 @@
             </v-btn>
           </v-form>
         </v-card>
-
-        <!-- TABLA DE JUGADORES -->
-        <v-card elevation="8" class="pa-4">
-          <h3 class="text-h6 font-weight-bold mb-4">Lista de Jugadores</h3>
-
-          <v-table>
-            <thead>
-              <tr>
-                <th>Imagen</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Posición</th>
-                <th>Número</th>
-                <th class="text-center">Acciones</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr v-for="(player, index) in players" :key="index">
-
-                <td>
-                  <v-avatar size="45">
-                    <img :src="player.imagen" alt="jugador" />
-                  </v-avatar>
-                </td>
-
-                <td>{{ player.nombre }}</td>
-                <td>{{ player.apellido }}</td>
-                <td>{{ player.posicion }}</td>
-                <td>{{ player.numero }}</td>
-
-                <td class="text-center">
-                  <v-btn
-                    size="small"
-                    color="blue"
-                    class="mr-2"
-                    @click="editPlayer(index)"
-                  >
-                    Editar
-                  </v-btn>
-
-                  <v-btn
-                    size="small"
-                    color="red"
-                    @click="deletePlayer(index)"
-                  >
-                    Eliminar
-                  </v-btn>
-                </td>
-
-              </tr>
-            </tbody>
-          </v-table>
-
-        </v-card>
-
       </v-container>
     </v-main>
   </v-app>
