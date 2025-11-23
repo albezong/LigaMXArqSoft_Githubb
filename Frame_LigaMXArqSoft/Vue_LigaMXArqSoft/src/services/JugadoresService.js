@@ -2,14 +2,14 @@ import api from './api'
 
 // Obtener todos los jugadores
 export const getJugadores = async () => {
-  const r = await api.get('/ApiLiga/Obtener/Jugadores')
+  const r = await api.get('/ApiLiga/Obtener/Jugadoress')
   console.log("API JUGADORES RESPUESTA:", r.data)
   return r.data
 }
 
 // Obtener jugador por ID
 export const getJugadorById = async (id) => {
-  const r = await api.get(`/ApiLiga/Obtener/JugadoresId/${id}`)
+  const r = await api.get(`/ApiLiga/Obtener/JugadoressId/${id}`)
   console.log("API JUGADOR POR ID RESPUESTA:", r.data)
   return r.data
 }
@@ -23,7 +23,7 @@ export const crearJugador = async (jugador) => {
 
 // Actualizar jugador
 export const actualizarJugador = async (id, jugador) => {
-  const r = await api.put(`/ApiLiga/Actualizar/Jugador/${id}`, jugador)
+  const r = await api.put(`/ApiLiga/Actualizar/Jugadorr/${id}`, jugador)
   console.log("API ACTUALIZAR JUGADOR RESPUESTA:", r.data)
   return r.data
 }

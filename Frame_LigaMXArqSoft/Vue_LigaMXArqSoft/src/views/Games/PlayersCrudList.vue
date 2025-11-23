@@ -3,11 +3,11 @@
     <v-main>
       <v-container>
 
-        <h1 class="text-h4 font-weight-bold mb-6">Gestión de Jugadores</h1>
-        <!-- TABLA DE JUGADORES -->
-        <v-card elevation="8" class="pa-4">
-          <h3 class="text-h6 font-weight-bold mb-4">Lista de Jugadores</h3>
+        <h1 class="text-h4 font-weight-bold mb-6">Lista de Jugadores</h1>
 
+        <v-card elevation="8" class="pa-4">
+
+          <!-- TABLA DE JUGADORES -->
           <v-table>
             <thead>
               <tr>
@@ -21,7 +21,7 @@
             </thead>
 
             <tbody>
-              <tr v-for="(player, index) in players" :key="index">
+              <tr v-for="(player, index) in jugadores" :key="index">
 
                 <td>
                   <v-avatar size="45">
@@ -35,21 +35,14 @@
                 <td>{{ player.numero }}</td>
 
                 <td class="text-center">
-                  <v-btn
-                    size="small"
-                    color="blue"
+                  <v-btn size="small" color="blue" variant="outlined"
                     class="mr-2"
-                    variant="outlined"
-                    @click="editPlayer(index)"
-                  >
+                    @click="editPlayer(player)">
                     Editar
                   </v-btn>
 
-                  <v-btn
-                    size="small"
-                    color=""
-                    @click="deletePlayer(index)"
-                  >
+                  <v-btn size="small" color="red"
+                    @click="deletePlayer(player.id)">
                     Eliminar
                   </v-btn>
                 </td>
@@ -65,16 +58,16 @@
   </v-app>
 </template>
 
+
 <script>
-import axios from "axios";
+import { useJugadoresStore } from "@/stores/JugadoresStore";
+import { mapState, mapActions } from "pinia";
 
 export default {
   name: "PlayersCRUD",
 
   data() {
     return {
-      players: [],
-
       form: {
         id: 0,
         nombre: "",
@@ -84,141 +77,44 @@ export default {
         imagen: "",
         equipoId: 0
       },
-
-      editIndex: -1,
-      loading: false
+      editMode: false
     };
   },
 
+  computed: {
+    ...mapState(useJugadoresStore, ["jugadores", "loading"])
+  },
+
   created() {
-    this.getPlayers();
+    this.fetchAll(); // cargar jugadores al abrir la vista
   },
 
   methods: {
-    /* ============================
-       GET: Obtener lista de jugadores
-    ============================*/
-    async getPlayers() {
-      try {
-        const res = await axios.get("http://localhost:49986/ApiLiga/Obtener/Jugadoress");
+    ...mapActions(useJugadoresStore, [
+      "fetchAll",
+      "create",
+      "update",
+      "remove"
+    ]),
 
-        console.log("API RESPONSE:", res.data);
-
-        const data = Array.isArray(res.data) ? res.data : [res.data];
-
-        this.players = data.map(j => ({
-          id: j.Id,
-          nombre: j.Nombre,
-          apellido: j.Apellido_Paterno,
-          posicion: j.Posicion,
-          numero: j.Numero,
-          imagen: j.imagenURL,
-          equipoId: j.EquipoId
-        }));
-
-        console.log("PLAYERS MAPEADOS:", this.players);
-
-      } catch (err) {
-        console.error("Error al obtener jugadores:", err);
-      }
+    editPlayer(player) {
+      this.editMode = true;
+      this.form = { ...player };
     },
 
-    /* ============================
-       POST O PUT: Guardar jugador
-    ============================*/
-    async savePlayer() {
-      if (
-        !this.form.nombre ||
-        !this.form.apellido ||
-        !this.form.posicion ||
-        !this.form.numero ||
-        !this.form.imagen
-      ) {
-        alert("Completa todos los campos");
-        return;
-      }
-
-      try {
-        if (this.editIndex === -1) {
-          /* ===== INSERTAR ===== */
-          await axios.post(
-            "http://localhost:49986/ApiLiga/Insertar/Jugadorr",
-            {
-              Id: 0,
-              Nombre: this.form.nombre,
-              Apellido_Paterno: this.form.apellido,
-              Posicion: this.form.posicion,
-              imagenURL: this.form.imagen,
-              Numero: this.form.numero,
-              EquipoId: this.form.equipoId
-            }
-          );
-
-          alert("Jugador agregado correctamente");
-        } else {
-          /* ===== ACTUALIZAR ===== */
-          await axios.put(
-            `http://localhost:49986/ApiLiga/Actualizar/Jugadorr/${this.form.id}`,
-            {
-              Id: this.form.id,
-              Nombre: this.form.nombre,
-              Apellido_Paterno: this.form.apellido,
-              Posicion: this.form.posicion,
-              imagenURL: this.form.imagen,
-              Numero: this.form.numero,
-              EquipoId: this.form.equipoId
-            }
-          );
-
-          alert("Jugador actualizado");
-        }
-
-        this.resetForm();
-        this.getPlayers();
-      } catch (err) {
-        console.error("Error al guardar jugador:", err);
-      }
-    },
-
-    /* ============================
-       Editar jugador
-    ============================*/
-    editPlayer(index) {
-      const p = this.players[index];
-      this.editIndex = index;
-
-      this.form = {
-        id: p.id,
-        nombre: p.nombre,
-        apellido: p.apellido,
-        posicion: p.posicion,
-        numero: p.numero,
-        imagen: p.imagen,
-        equipoId: p.equipoId
-      };
-    },
-
-    /* ============================
-        DELETE Jugador
-    ============================*/
-    async deletePlayer(index) {
-      const id = this.players[index].id;
-
+    async deletePlayer(id) {
       if (!confirm("¿Eliminar jugador?")) return;
 
-      try {
-        await axios.delete(
-          `http://localhost:49986/ApiLiga/Eliminar/Jugadorr/${id}`
-        );
-
-        alert("Jugador eliminado");
-        this.getPlayers();
-      } catch (err) {
-        console.error("Error al eliminar jugador:", err);
-      }
+      await this.remove(id);
     },
 
-    cancelEdit() {
+    async savePlayer() {
+      if (this.editMode) {
+        await this.update(this.form);
+      } else {
+        await this.create(this.form);
+      }
+
       this.resetForm();
     },
 
@@ -232,12 +128,11 @@ export default {
         imagen: "",
         equipoId: 0
       };
-      this.editIndex = -1;
+      this.editMode = false;
     }
   }
 };
 </script>
-
 
 <style scoped>
 </style>
