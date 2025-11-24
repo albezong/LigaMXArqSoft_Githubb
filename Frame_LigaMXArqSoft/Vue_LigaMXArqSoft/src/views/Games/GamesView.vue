@@ -64,7 +64,6 @@
 
               <div class="mt-4">
                 <v-btn class="mt-1" variant="outlined">Vista Previa</v-btn>
-                <v-btn class="mt-1 mx-2" color="primary">Entradas</v-btn>
               </div>
             </v-col>
 
