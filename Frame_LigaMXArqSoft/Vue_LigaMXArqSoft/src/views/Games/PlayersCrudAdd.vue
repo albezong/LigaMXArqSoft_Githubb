@@ -2,8 +2,15 @@
   <v-app>
     <v-main>
       <v-container>
+        <!-- BOTÓN Y TÍTULO EN LA MISMA FILA -->
+        <div class="d-flex align-center mb-6">
+          <v-btn color="grey" variant="outlined" @click="$router.push('/players_crud_list')">
+            ← Regresar
+          </v-btn>
 
-        <h1 class="text-h4 font-weight-bold mb-6">Gestión de Jugadores</h1>
+          <h1 class="text-h4 font-weight-bold ml-4">Gestión de Jugadores</h1>
+        </div>
+
 
         <!-- FORMULARIO -->
         <v-card elevation="8" class="pa-4 mb-6">
@@ -13,55 +20,29 @@
 
           <v-form @submit.prevent="savePlayer">
 
-            <v-text-field
-              v-model="form.nombre"
-              label="Nombre"
-              prepend-inner-icon="mdi-account"
-              required
-            />
+            <v-text-field v-model="form.nombre" label="Nombre" prepend-inner-icon="mdi-account" required />
 
-            <v-text-field
-              v-model="form.apellido"
-              label="Apellido"
-              prepend-inner-icon="mdi-account-outline"
-              required
-            />
+            <v-text-field v-model="form.apellido" label="Apellido" prepend-inner-icon="mdi-account-outline" required />
 
-            <v-text-field
-              v-model="form.posicion"
-              label="Posición"
-              prepend-inner-icon="mdi-basketball"
-              required
-            />
+            <v-text-field v-model="form.posicion" label="Posición" prepend-inner-icon="mdi-basketball" required />
 
-            <v-text-field
-              v-model="form.numero"
-              label="Número"
-              type="number"
-              prepend-inner-icon="mdi-pound"
-              required
-            />
+            <v-text-field v-model="form.numero" label="Número" type="number" prepend-inner-icon="mdi-pound" required />
 
-            <v-text-field
-              v-model="form.imagen"
-              label="URL Imagen del Jugador"
-              prepend-inner-icon="mdi-image"
-              required
-            />
+            <v-text-field v-model="form.imagen" label="URL Imagen del Jugador" prepend-inner-icon="mdi-image"
+              required />
 
+              
+              <v-btn v-if="editIndex !== -1" class="mt-3 ml-3" color="grey" @click="cancelEdit">
+                Cancelar
+              </v-btn>
+            </v-form>
+            <!-- SELECT DE EQUIPOS -->
+            <v-select v-model="form.equipoId" :items="equipos" item-title="Nombre" item-value="Id"
+            label="Selecciona un Equipo" prepend-inner-icon="mdi-shield" required class="mb-4" />
             <v-btn type="submit" color="primary" class="mt-3">
               {{ editIndex === -1 ? "Agregar" : "Guardar Cambios" }}
             </v-btn>
 
-            <v-btn
-              v-if="editIndex !== -1"
-              class="mt-3 ml-3"
-              color="grey"
-              @click="cancelEdit"
-            >
-              Cancelar
-            </v-btn>
-          </v-form>
         </v-card>
       </v-container>
     </v-main>
@@ -77,6 +58,7 @@ export default {
   data() {
     return {
       players: [],
+    equipos: [],
 
       form: {
         id: 0,
@@ -94,10 +76,26 @@ export default {
   },
 
   created() {
-    this.getPlayers();
+  this.getPlayers();
+  this.getEquipos();
   },
 
   methods: {
+    async getEquipos() {
+  try {
+    const res = await axios.get("http://localhost:49986/ApiLiga/Obtener/equipos");
+
+    this.equipos = res.data.map(e => ({
+      Id: e.Id,
+      Nombre: e.Nombre
+    }));
+
+    console.log("EQUIPOS CARGADOS:", this.equipos);
+  } catch (err) {
+    console.error("Error al obtener equipos:", err);
+  }
+},
+
     /* ============================
        GET: Obtener lista de jugadores
     ============================*/
@@ -130,6 +128,7 @@ export default {
        POST O PUT: Guardar jugador
     ============================*/
     async savePlayer() {
+      // Validaciones
       if (
         !this.form.nombre ||
         !this.form.apellido ||
@@ -142,18 +141,20 @@ export default {
       }
 
       try {
+        /* ===== INSERTAR ===== */
         if (this.editIndex === -1) {
-          /* ===== INSERTAR ===== */
           await axios.post(
-            "http://localhost:49986/ApiLiga/Insertar/Jugadorr",
+            "http://localhost:49986/ApiLiga/Insertar/Jugador",
             {
-              Id: 0,
               Nombre: this.form.nombre,
               Apellido_Paterno: this.form.apellido,
               Posicion: this.form.posicion,
               imagenURL: this.form.imagen,
-              Numero: this.form.numero,
-              EquipoId: this.form.equipoId
+              Numero: Number(this.form.numero),
+              EquipoId: Number(this.form.equipoId)
+            },
+            {
+              headers: { "Content-Type": "application/json" }
             }
           );
 
@@ -161,15 +162,14 @@ export default {
         } else {
           /* ===== ACTUALIZAR ===== */
           await axios.put(
-            `http://localhost:49986/ApiLiga/Actualizar/Jugadorr/${this.form.id}`,
+            `http://localhost:49986/ApiLiga/Actualizar/Jugador/${this.form.id}`,
             {
-              Id: this.form.id,
               Nombre: this.form.nombre,
               Apellido_Paterno: this.form.apellido,
               Posicion: this.form.posicion,
               imagenURL: this.form.imagen,
-              Numero: this.form.numero,
-              EquipoId: this.form.equipoId
+              Numero: Number(this.form.numero),
+              EquipoId: Number(this.form.equipoId)
             }
           );
 
@@ -178,10 +178,13 @@ export default {
 
         this.resetForm();
         this.getPlayers();
+
       } catch (err) {
         console.error("Error al guardar jugador:", err);
+        alert("Ocurrió un error al guardar el jugador");
       }
     },
+
 
     /* ============================
        Editar jugador
@@ -242,5 +245,4 @@ export default {
 </script>
 
 
-<style scoped>
-</style>
+<style scoped></style>

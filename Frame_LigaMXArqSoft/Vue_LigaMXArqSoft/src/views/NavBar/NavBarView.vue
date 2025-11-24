@@ -68,7 +68,7 @@ export default {
 
             { text: "Partidos", to: "/games", icon: "mdi-basketball", auth: true },
             { text: "Posiciones", to: "/standings", icon: "mdi-podium", auth: true },
-            { text: "Jugadores", to: "/playerscrud", icon: "mdi-account", auth: true },
+            { text: "Jugadores", to: "/players_crud_list", icon: "mdi-account", auth: true },
             { text: "Equipos", to: "/teams", icon: "mdi-account-group", auth: true },
             { text: "Gestión de Equipos", to: "/teamscrud", icon: "mdi-tools", auth: true },
         ]);
