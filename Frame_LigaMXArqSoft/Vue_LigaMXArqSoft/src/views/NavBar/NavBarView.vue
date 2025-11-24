@@ -68,9 +68,12 @@ export default {
 
             { text: "Partidos", to: "/games", icon: "mdi-basketball", auth: true },
             { text: "Posiciones", to: "/standings", icon: "mdi-podium", auth: true },
-            { text: "Jugadores", to: "/players_crud_list", icon: "mdi-account", auth: true },
+            { text: "Jugadores", to: "/playerscrud", icon: "mdi-account", auth: true },
             { text: "Equipos", to: "/teams", icon: "mdi-account-group", auth: true },
             { text: "Gestión de Equipos", to: "/teamscrud", icon: "mdi-tools", auth: true },
+            { text: "Gestión de Partidos", to: "/partidoscrud", icon: "mdi-tools", auth: true },
+            { text: "Gestión de Entrenadores", to: "/entrenadorescrud", icon: "mdi-tools", auth: true },
+            { text: "Contáctanos", to: "/contacto", icon: "mdi-tools", auth: true },
         ]);
 
         // 🔍 Filtrar según login
