@@ -3,16 +3,17 @@
     <v-main>
       <v-container class="py-10">
 
-        <!-- TÍTULO -->
-        <h2 class="text-h4 font-weight-bold mb-6">Equipos</h2>
+        <!-- TÍTULO + BOTÓN NUEVO -->
+        <div class="d-flex justify-space-between align-center mb-6">
+          <h2 class="text-h4 font-weight-bold">Equipos</h2>
 
-        <!-- BOTÓN NUEVO -->
-        <v-btn color="green" class="mb-6" @click="abrirNuevo">
-          Nuevo Equipo
-        </v-btn>
+          <v-btn color="green-darken-1" prepend-icon="mdi-plus" @click="abrirNuevo">
+            Nuevo Equipo
+          </v-btn>
+        </div>
 
-        <!-- LISTA DE TARJETAS -->
-        <v-row dense>
+        <!-- GRID DE TARJETAS -->
+        <v-row class="g-4">
           <v-col
             v-for="team in teams"
             :key="team.Id"
@@ -21,47 +22,72 @@
             md="4"
             lg="3"
           >
-            <v-card elevation="6" class="pa-4">
+            <v-card
+              :elevation="hover === team.Id ? 14 : 8"
+              class="pa-4 team-card"
+              @mouseenter="hover = team.Id"
+              @mouseleave="hover = null"
+            >
+              <div class="team-id">#{{ team.Id }}</div>
 
               <!-- AVATAR -->
               <div class="d-flex justify-center mb-4">
-                <v-avatar size="50" color="grey lighten-2">
-                  <span class="text-h6">
-                    {{ team.Nombre?.charAt(0) }}
-                  </span>
+                <v-avatar
+                  size="56"
+                  class="white--text"
+                  :color="stringToColor(team.Nombre)"
+                >
+                  {{ team.Nombre?.charAt(0) }}
                 </v-avatar>
               </div>
 
               <!-- NOMBRE -->
-              <h3 class="text-h6 text-center font-weight-bold mb-1">
+              <v-card-title class="team-name">
                 {{ team.Nombre }}
-              </h3>
+              </v-card-title>
 
-              <!-- CIUDAD -->
-              <p class="text-center text-caption mb-4">
-                {{ team.Ciudad }}
-              </p>
+              <!-- CIUDAD EN CHIP -->
+              <v-card-text class="text-center">
+                <v-chip
+                  color="blue-grey lighten-4"
+                  size="small"
+                  class="text-body-2"
+                >
+                  {{ team.Ciudad }}
+                </v-chip>
+              </v-card-text>
 
               <!-- BOTONES -->
-              <div class="d-flex justify-center">
-                <v-btn small color="blue darken-2" class="mx-1" @click="abrirEditar(team.Id)">
-                  <v-icon small>mdi-pencil</v-icon>
+              <v-card-actions class="d-flex justify-center">
+                <v-btn
+                  icon
+                  size="small"
+                  variant="text"
+                  color="blue-darken-2"
+                  @click="abrirEditar(team.Id)"
+                >
+                  <v-icon>mdi-pencil</v-icon>
                 </v-btn>
 
-                <v-btn small color="red darken-2" class="mx-1" @click="eliminarEquipo(team.Id, team.Nombre)">
-                  <v-icon small>mdi-delete</v-icon>
+                <v-btn
+                  icon
+                  size="small"
+                  variant="text"
+                  color="red-darken-2"
+                  @click="eliminarEquipo(team.Id, team.Nombre)"
+                >
+                  <v-icon>mdi-delete</v-icon>
                 </v-btn>
-              </div>
-
+              </v-card-actions>
             </v-card>
           </v-col>
         </v-row>
 
-        <!-- FORMULARIO EN DIÁLOGO -->
+        <!-- DIÁLOGO -->
         <v-dialog v-model="dialog" max-width="500">
-          <v-card class="pa-4">
+          <v-card class="pa-6 rounded-xl">
 
-            <h3 class="text-h6 font-weight-bold mb-4">
+            <h3 class="text-h6 font-weight-bold mb-6">
               {{ modoEdicion ? "Editar Equipo" : "Nuevo Equipo" }}
             </h3>
 
@@ -87,9 +113,15 @@
               class="mb-3"
             />
 
-            <v-card-actions class="d-flex justify-end">
-              <v-btn color="grey" @click="cerrarDialog">Cancelar</v-btn>
-              <v-btn color="green" @click="guardarEquipo">Guardar</v-btn>
+            <!-- BOTONES -->
+            <v-card-actions class="d-flex justify-end mt-4">
+              <v-btn variant="text" color="grey-darken-1" @click="cerrarDialog">
+                Cancelar
+              </v-btn>
+
+              <v-btn color="green-darken-1" @click="guardarEquipo">
+                Guardar
+              </v-btn>
             </v-card-actions>
 
           </v-card>
@@ -108,6 +140,7 @@ import axios from 'axios'
 const teams = ref([])
 const dialog = ref(false)
 const modoEdicion = ref(false)
+const hover = ref(null)
 
 const form = ref({
   Id: 0,
@@ -116,26 +149,30 @@ const form = ref({
   UsuarioId: 0
 })
 
-/* ─────────────────────────────────────────────
-   CARGAR EQUIPOS
-───────────────────────────────────────────────*/
+/* COLORES DINÁMICOS */
+function stringToColor(str) {
+  if (!str) return "grey"
+  const colors = [
+    "deep-purple", "indigo", "blue",
+    "teal", "green", "orange", "red"
+  ]
+  return colors[str.length % colors.length] + " lighten-1"
+}
+
+/* CARGAR EQUIPOS */
 async function cargarEquipos() {
   const { data } = await axios.get("http://localhost:49986/ApiLiga/Obtener/Equipos")
   teams.value = data
 }
 
-/* ─────────────────────────────────────────────
-   ABRIR NUEVO
-───────────────────────────────────────────────*/
+/* ABRIR NUEVO */
 function abrirNuevo() {
   modoEdicion.value = false
   form.value = { Id: 0, Nombre: "", Ciudad: "", UsuarioId: 0 }
   dialog.value = true
 }
 
-/* ─────────────────────────────────────────────
-   ABRIR EDITAR
-───────────────────────────────────────────────*/
+/* ABRIR EDITAR */
 async function abrirEditar(id) {
   const { data } = await axios.get(`http://localhost:49986/ApiLiga/Obtener/EquiposById?id=${id}`)
   form.value = { ...data }
@@ -143,9 +180,7 @@ async function abrirEditar(id) {
   dialog.value = true
 }
 
-/* ─────────────────────────────────────────────
-   GUARDAR
-───────────────────────────────────────────────*/
+/* GUARDAR */
 async function guardarEquipo() {
   if (modoEdicion.value) {
     await axios.put(
@@ -163,12 +198,9 @@ async function guardarEquipo() {
   cargarEquipos()
 }
 
-/* ─────────────────────────────────────────────
-   ELIMINAR
-───────────────────────────────────────────────*/
+/* ELIMINAR */
 async function eliminarEquipo(id, nombre) {
   if (!confirm(`¿Eliminar el equipo ${nombre}?`)) return;
-
   await axios.delete(`http://localhost:49986/ApiLiga/Eliminar/Equipo/${id}`)
   cargarEquipos()
 }
@@ -179,3 +211,75 @@ function cerrarDialog() {
 
 onMounted(cargarEquipos)
 </script>
+
+
+<!-- ESTILOS -->
+<style>
+/* -------- TIPOGRAFÍA DEPORTIVA -------- */
+.team-card h3,
+.team-name,
+.v-btn,
+strong {
+  font-family: "Anton", sans-serif !important;
+  letter-spacing: 1px;
+}
+
+/* -------- CARD DEPORTIVO -------- */
+.team-card {
+  border-radius: 18px !important;
+  border: 3px solid #00000020 !important;
+  transition: transform .2s ease, box-shadow .2s ease;
+  position: relative;
+}
+
+.team-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0px 6px 18px #00000040 !important;
+}
+
+/* -------- ID EN LA ESQUINA -------- */
+.team-id {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  background: #ff3d0015;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  font-family: "Anton", sans-serif !important;
+  color: #ff3d00;
+}
+
+/* -------- NOMBRE CENTRADO Y DEPORTIVO -------- */
+.team-name {
+  text-align: center;
+  font-size: 1.3rem;
+  font-family: "Anton", sans-serif !important;
+  letter-spacing: 1px;
+  font-weight: bold !important;
+}
+
+/* -------- CHIP -------- */
+.v-chip {
+  font-family: "Anton", sans-serif !important;
+  letter-spacing: 1px;
+  font-size: 0.85rem !important;
+}
+
+/* -------- BOTONES -------- */
+.team-card .v-btn {
+  font-family: "Anton", sans-serif !important;
+  font-weight: bold !important;
+  transition: transform .15s ease;
+}
+
+.v-btn:hover {
+  transform: translateY(-2px);
+}
+
+.v-btn:active {
+  transform: translateY(2px);
+}
+
+</style>
