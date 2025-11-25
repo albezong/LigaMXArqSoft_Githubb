@@ -9,10 +9,15 @@ export const getEquipos = async () => {
 
 // Obtener equipo por ID
 export const getEquipoById = async (id) => {
-  const r = await api.get(`/ApiLiga/Obtener/EquiposById/${id}`)
-  console.log("API EQUIPO POR ID RESPUESTA:", r.data)
-  return r.data
-}
+  try {
+    const r = await api.get(`/ApiLiga/Obtener/EquiposById?id=${id}`);
+    console.log("API EQUIPO POR ID RESPUESTA:", r.data);
+    return r.data;
+  } catch (e) {
+    console.error("ERROR API EQUIPO POR ID:", e);
+    return [];
+  }
+};
 
 // Crear equipo
 export const crearEquipo = async (equipo) => {

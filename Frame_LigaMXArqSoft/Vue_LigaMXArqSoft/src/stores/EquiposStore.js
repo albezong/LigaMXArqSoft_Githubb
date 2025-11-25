@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import * as svc from '../services/equipos' // 👈 importa tu servicio de equipos
+import * as svc from '../services/EquiposService' // 👈 importa tu servicio de equipos
 
 export const useEquiposStore = defineStore('equipos', {
   state: () => ({
     equipos: [],      // lista de equipos
     selected: null,   // equipo seleccionado por id
+    selectedEquipo: null, // 👈 agregamos este
     loading: false,
     error: null
   }),
@@ -22,18 +23,21 @@ export const useEquiposStore = defineStore('equipos', {
     },
 
     // Obtener un equipo por ID
-    async fetchById(id) {
-      this.loading = true
+    async fetchEquipoById(id) {
+      this.loading = true;
+      this.error = null;
+
       try {
-        this.selected = await svc.getEquipoById(id)
-        return this.selected
+        const data = await svc.getEquipoById(id);
+        this.selectedEquipo = Array.isArray(data) && data.length > 0 ? data[0] : null;
       } catch (err) {
-        this.error = err
-        this.selected = null
+        this.error = "Error obteniendo el equipo";
+        this.selectedEquipo = null;
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
+
 
     // Crear un nuevo equipo
     async create(equipo) {
@@ -49,15 +53,16 @@ export const useEquiposStore = defineStore('equipos', {
     },
 
     // Actualizar un equipo existente
+
     async update(equipo) {
-      this.loading = true
+      this.loading = true;
       try {
-        await svc.actualizarEquipo(equipo.id, equipo)
-        await this.fetchAll()
+        await svc.actualizarEquipo(equipo.Id, equipo); // 👈 asegurarnos de que sea Id
+        await this.fetchAll();
       } catch (err) {
-        this.error = err
+        this.error = err;
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
 
