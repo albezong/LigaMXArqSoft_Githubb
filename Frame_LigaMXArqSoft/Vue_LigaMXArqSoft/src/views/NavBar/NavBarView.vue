@@ -11,15 +11,31 @@
 
         <!-- Desktop menu -->
         <div class="d-none d-md-flex">
-            <v-btn
-                v-for="item in filteredNav"
-                :key="item.text"
-                variant="text"
-                class="mx-2 text-white"
-                @click="navigate(item)"
-            >
-                {{ item.text }}
-            </v-btn>
+
+            <template v-for="item in filteredNav" :key="item.text">
+
+                <!-- ITEM NORMAL -->
+                <v-btn v-if="!item.children" variant="text" class="mx-2 text-white" @click="navigate(item)">
+                    {{ item.text }}
+                </v-btn>
+
+                <!-- ITEM CON SUBMENÚ -->
+                <v-menu v-else>
+                    <template #activator="{ props }">
+                        <v-btn v-bind="props" variant="text" class="mx-2 text-white">
+                            {{ item.text }} <v-icon end>mdi-menu-down</v-icon>
+                        </v-btn>
+                    </template>
+
+                    <v-list>
+                        <v-list-item v-for="sub in item.children" :key="sub.text" @click="navigate(sub)">
+                            {{ sub.text }}
+                        </v-list-item>
+                    </v-list>
+                </v-menu>
+
+            </template>
+
         </div>
 
         <!-- Mobile button -->
@@ -32,12 +48,7 @@
     <!-- Mobile drawer -->
     <v-navigation-drawer v-model="drawer" temporary location="right">
         <v-list>
-            <v-list-item
-                v-for="item in filteredNav"
-                :key="item.text"
-                :title="item.text"
-                @click="navigate(item)"
-            >
+            <v-list-item v-for="item in filteredNav" :key="item.text" :title="item.text" @click="navigate(item)">
                 <template #prepend>
                     <v-icon v-if="item.icon">{{ item.icon }}</v-icon>
                 </template>
@@ -68,15 +79,25 @@ export default {
 
             { text: "Partidos", to: "/games", icon: "mdi-basketball", auth: true },
             { text: "Posiciones", to: "/standings", icon: "mdi-podium", auth: true },
-            { text: "Jugadores", to: "/playerscrud", icon: "mdi-account", auth: true },
+            { text: "Jugadores", to: "/players_crud_list", icon: "mdi-account", auth: true },
             { text: "Equipos", to: "/teams", icon: "mdi-account-group", auth: true },
-            { text: "Gestión de Equipos", to: "/teamscrud", icon: "mdi-tools", auth: true },
-            { text: "Gestión de Partidos", to: "/partidoscrud", icon: "mdi-tools", auth: true },
-            { text: "Gestión de Entrenadores", to: "/entrenadorescrud", icon: "mdi-tools", auth: true },
-            { text: "Contáctanos", to: "/contacto", icon: "mdi-tools", auth: true },
+
+            // --- Agrupado ---
+            {
+                text: "Gestiónes",
+                icon: "mdi-tools",
+                auth: true,
+                children: [
+                    { text: "Gest. Equipos", to: "/teamscrud" },
+                    { text: "Gest. Partidos", to: "/partidoscrud" },
+                    { text: "Gest. Entrenadores", to: "/entrenadorescrud" },
+                    { text: "Contáctanos", to: "/contacto" }
+                ]
+            }
         ]);
 
-        // 🔍 Filtrar según login
+
+        // Filtrar según login
         const filteredNav = computed(() => {
             if (usuariosStore.authUser) {
                 return [

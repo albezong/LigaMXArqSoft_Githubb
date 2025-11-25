@@ -9,14 +9,16 @@ export const getJugadores = async () => {
 
 // Obtener jugador por ID
 export const getJugadorById = async (id) => {
-  const r = await api.get(`/ApiLiga/Obtener/JugadoressId/${id}`)
-  console.log("API JUGADOR POR ID RESPUESTA:", r.data)
-  return r.data
-}
+  const r = await api.get(`/ApiLiga/Obtener/JugadoressId`, {
+    params: { id }
+  });
+  console.log("API JUGADOR POR ID RESPUESTA:", r.data);
+  return r.data;
+};
 
 // Crear jugador
 export const crearJugador = async (jugador) => {
-  const r = await api.post('/ApiLiga/Insertar/Jugador', jugador)
+  const r = await api.post('/ApiLiga/Insertar/Jugadorr', jugador)
   console.log("API CREAR JUGADOR RESPUESTA:", r.data)
   return r.data
 }

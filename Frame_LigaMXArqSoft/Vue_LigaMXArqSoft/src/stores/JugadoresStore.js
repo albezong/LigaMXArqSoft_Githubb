@@ -52,7 +52,7 @@ export const useJugadoresStore = defineStore('jugadores', {
     async update(jugador) {
       this.loading = true
       try {
-        await svc.actualizarJugador(jugador.id, jugador)
+        await svc.actualizarJugador(jugador.Id, jugador)
         await this.fetchAll()
       } catch (err) {
         this.error = err

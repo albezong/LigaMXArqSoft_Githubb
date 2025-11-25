@@ -11,6 +11,7 @@ import TeamsCrud from "@/views/Games/TeamsCrud.vue";
 import PlayersCrudAdd from "@/views/Games/PlayersCrudAdd.vue";
 import PlayersCrudList from "@/views/Games/PlayersCrudList.vue";
 import UpdateEquipoView from "@/views/Games/UpdateEquipoView.vue";
+import PlayersCrudEdit from "@/views/Games/PlayersCrudEdit.vue";
 
 const routes = [
   { path: "/", redirect: "/login" },
@@ -28,6 +29,7 @@ const routes = [
   //CRUDs también protegidos
   { path: "/players_crud_add", component: PlayersCrudAdd, meta: { requiresAuth: true }},
   { path: "/players_crud_list", component: PlayersCrudList, meta: { requiresAuth: true }},
+  { path: "/players_crud_edit", component: PlayersCrudEdit, meta: { requiresAuth: true }},
   { path: "/teamscrud", component: TeamsCrud, meta: { requiresAuth: true }},
   { path: "/update", component: UpdateEquipoView, meta: { requiresAuth: true }},
 ];

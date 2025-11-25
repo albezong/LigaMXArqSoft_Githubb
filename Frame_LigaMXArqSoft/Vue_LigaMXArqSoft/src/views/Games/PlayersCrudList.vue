@@ -94,8 +94,9 @@ export default {
     ...mapActions(useJugadoresStore, ["fetchAll", "remove"]),
 
     goToEdit(id) {
-      this.$router.push(`/players_crud_add?id=${id}`);
+      this.$router.push(`/players_crud_edit?id=${id}`);
     },
+
 
     async deletePlayer(id) {
       if (!confirm("¿Eliminar jugador?")) return;
