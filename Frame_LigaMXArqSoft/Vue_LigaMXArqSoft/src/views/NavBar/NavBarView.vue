@@ -47,14 +47,45 @@
 
     <!-- Mobile drawer -->
     <v-navigation-drawer v-model="drawer" temporary location="right">
+
         <v-list>
-            <v-list-item v-for="item in filteredNav" :key="item.text" :title="item.text" @click="navigate(item)">
-                <template #prepend>
-                    <v-icon v-if="item.icon">{{ item.icon }}</v-icon>
-                </template>
-            </v-list-item>
+
+            <!-- Recorrido principal -->
+            <template v-for="item in filteredNav">
+
+                <!-- ITEM SIN SUBMENÚ -->
+                <v-list-item v-if="!item.children" :key="item.text" @click="navigateMobile(item)">
+                    <template #prepend>
+                        <v-icon v-if="item.icon">{{ item.icon }}</v-icon>
+                    </template>
+
+                    {{ item.text }}
+                </v-list-item>
+
+                <!-- ITEM CON SUBMENÚ (ACORDEÓN) -->
+                <v-list-group v-else:key="item.text" prepend-icon="mdi-chevron-down">
+                    <template #activator="{ props }">
+                        <v-list-item v-bind="props">
+                            <template #prepend>
+                                <v-icon>{{ item.icon }}</v-icon>
+                            </template>
+                            {{ item.text }}
+                        </v-list-item>
+                    </template>
+
+                    <!-- SUB MENÚ -->
+                    <v-list-item v-for="sub in item.children" :key="sub.text" @click="navigateMobile(sub)">
+                        {{ sub.text }}
+                    </v-list-item>
+
+                </v-list-group>
+
+            </template>
+
         </v-list>
+
     </v-navigation-drawer>
+
 </template>
 
 
@@ -88,8 +119,8 @@ export default {
                 icon: "mdi-tools",
                 auth: true,
                 children: [
-                    { text: "Gest. Equipos", to: "/teamscrud" },
-                    { text: "Gest. Partidos", to: "/partidoscrud" },
+                    { text: "Gest. Equipos", to: "/teams" },
+                    { text: "Gest. Partidos", to: "/partidos_crud_view" },
                     { text: "Gest. Entrenadores", to: "/entrenadorescrud" },
                     { text: "Contáctanos", to: "/contacto" }
                 ]
@@ -128,8 +159,15 @@ export default {
             router.push(item.to);
         };
 
-        return { drawer, nav, filteredNav, usuariosStore, navigate };
+        const navigateMobile = (item) => {
+            navigate(item); // usa tu nav normal
+            drawer.value = false; // <-- cierra el menú móvil
+        };
+
+
+        return { drawer, nav, filteredNav, usuariosStore, navigate, navigateMobile };
     },
+
 };
 </script>
 

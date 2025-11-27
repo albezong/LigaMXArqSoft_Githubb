@@ -3,68 +3,66 @@
     <v-main>
       <v-container class="py-10">
 
-        <!-- TÍTULO + BOTÓN NUEVO -->
-        <div class="d-flex justify-space-between align-center mb-6">
-          <h2 class="text-h4 font-weight-bold">Equipos</h2>
-
-          <v-btn color="green-darken-1" prepend-icon="mdi-plus" @click="abrirNuevo">
-            Nuevo Equipo
-          </v-btn>
-        </div>
-
-        <!-- GRID DE TARJETAS -->
-        <v-row class="g-4">
-          <v-col v-for="team in equiposStore.equipos" :key="team.Id" cols="12" sm="6" md="4" lg="3">
-            <v-card :elevation="hover === team.Id ? 14 : 8" class="pa-4 team-card" @mouseenter="hover = team.Id"
-              @mouseleave="hover = null">
-              <div class="team-id">#{{ team.Id }}</div>
-
-              <!-- AVATAR -->
-              <div class="d-flex justify-center mb-4">
-                <v-avatar size="56" class="white--text" :color="stringToColor(team.Nombre)">
-                  {{ team.Nombre?.charAt(0) }}
-                </v-avatar>
-              </div>
-
-              <!-- NOMBRE -->
-              <v-card-title class="team-name">
-                {{ team.Nombre }}
-              </v-card-title>
-
-              <!-- CIUDAD EN CHIP -->
-              <v-card-text class="text-center">
-                <v-chip color="blue-grey lighten-4" size="small" class="text-body-2">
-                  {{ team.Ciudad }}
-                </v-chip>
-              </v-card-text>
-
-              <!-- BOTONES -->
-              <v-card-actions class="d-flex justify-center">
-                <v-btn icon size="small" variant="text" color="blue-darken-2" @click="abrirEditar(team.Id)">
-                  <v-icon>mdi-pencil</v-icon>
-                </v-btn>
-
-                <v-btn icon size="small" variant="text" color="red-darken-2" @click="eliminar(team.Id, team.Nombre)">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
-
         <!-- DIÁLOGO -->
-        <v-dialog v-model="dialog" max-width="500">
+        <v-dialog v-model="dialog" max-width="500" persistent>
           <v-card class="pa-6 rounded-xl">
 
             <h3 class="text-h6 font-weight-bold mb-6">
               {{ modoEdicion ? "Editar Equipo" : "Nuevo Equipo" }}
             </h3>
 
-            <v-text-field label="Nombre" v-model="form.Nombre" variant="outlined" class="mb-3" />
+            <v-text-field
+              label="Nombre"
+              v-model="form.Nombre"
+              variant="outlined"
+              class="mb-3"
+            />
 
-            <v-text-field label="Ciudad" v-model="form.Ciudad" variant="outlined" class="mb-3" />
+            <v-text-field
+              label="Ciudad"
+              v-model="form.Ciudad"
+              variant="outlined"
+              class="mb-3"
+            />
 
-            <v-text-field label="Usuario ID" type="number" v-model="form.UsuarioId" variant="outlined" class="mb-3" />
+
+            <!-- ========================== -->
+            <!--      JUGADORES LISTA       -->
+            <!-- ========================== -->
+            <h3 class="mt-6 text-h6 font-weight-bold">Jugadores del equipo</h3>
+
+            <!-- BOTÓN AGREGAR -->
+            <div class="d-flex justify-end mb-4">
+              <v-btn color="green" @click="$router.push('/players_crud_add')">
+                Agregar Jugador
+              </v-btn>
+            </div>
+
+            <div v-if="jugadores.length === 0">
+              <p class="text-caption">Este equipo no tiene jugadores registrados.</p>
+            </div>
+
+            <v-list v-else>
+              <v-list-item
+                v-for="j in jugadores"
+                :key="j.Id"
+              >
+                <v-list-item-title>
+                  {{ j.Nombre }} {{ j.Apellido_Paterno }}
+                </v-list-item-title>
+
+                <template #append>
+                  <v-btn icon @click="editarJugador(j.Id)">
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
+
+                  <v-btn icon color="red" @click="eliminarJugador(j.Id)">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </template>
+              </v-list-item>
+            </v-list>
+
 
             <!-- BOTONES -->
             <v-card-actions class="d-flex justify-end mt-4">
@@ -76,6 +74,7 @@
                 Guardar
               </v-btn>
             </v-card-actions>
+
           </v-card>
         </v-dialog>
 
@@ -86,13 +85,21 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { useEquiposStore } from "@/stores/EquiposStore";
+import { useJugadoresStore } from "@/stores/JugadoresStore"; // ← IMPORTANTE
+import { obtenerJugadoresPorEquipo } from "@/services/JugadoresService";
 
+const route = useRoute();
 const equiposStore = useEquiposStore();
+const jugadoresStore = useJugadoresStore(); // ← IMPORTANTE
 
 const dialog = ref(false);
 const modoEdicion = ref(false);
-const hover = ref(null);
+
+const jugadores = ref([]);
+
+const equipoId = Number(route.query.id);
 
 const form = ref({
   Id: 0,
@@ -101,48 +108,43 @@ const form = ref({
   UsuarioId: 0
 });
 
-/* COLORES DINÁMICOS */
-function stringToColor(str) {
-  if (!str) return "grey";
-  const colors = ["deep-purple", "indigo", "blue", "teal", "green", "orange", "red"];
-  return colors[str.length % colors.length] + " lighten-1";
+// =====================================
+//      Cargar jugadores del equipo
+// =====================================
+async function cargarJugadoresEquipo(id) {
+  jugadores.value = await obtenerJugadoresPorEquipo(id);
+  console.log("Jugadores cargados:", jugadores.value);
 }
 
-/* CARGAR EQUIPOS */
-onMounted(() => {
-  equiposStore.fetchAll();
+// =====================================
+//              MONTAJE
+// =====================================
+onMounted(async () => {
+  await equiposStore.fetchAll();
+
+  if (equipoId) {
+    const equipo = equiposStore.equipos.find(e => e.Id === equipoId);
+
+    if (equipo) {
+      form.value = { ...equipo };
+      modoEdicion.value = true;
+      dialog.value = true;
+
+      cargarJugadoresEquipo(equipoId);
+    }
+  }
 });
 
-/* NUEVO */
-function abrirNuevo() {
-  modoEdicion.value = false;
-  form.value = { Id: 0, Nombre: "", Ciudad: "", UsuarioId: 0 };
-  dialog.value = true;
+// =====================================
+//              CRUD
+// =====================================
+function cerrarDialog() {
+  dialog.value = false;
 }
 
-/* EDITAR */
-function abrirEditar(Id) {
-  modoEdicion.value = true;
-
-  console.log("ID a editar:", Id);
-
-  const equipo = equiposStore.equipos.find(e => e.Id === Id);
-
-  if (!equipo) {
-    alert("No se encontró el equipo.");
-    return;
-  }
-
-  form.value = { ...equipo };
-  dialog.value = true;
-}
-  
-
-/* GUARDAR */
 async function guardarEquipo() {
-  if (!form.value.Nombre || !form.value.Ciudad || !form.value.UsuarioId) {
-    alert("Por favor completa todos los campos.");
-    return;
+  if (!form.value.Nombre || !form.value.Ciudad) {
+    return alert("Por favor completa todos los campos.");
   }
 
   if (modoEdicion.value) {
@@ -154,63 +156,44 @@ async function guardarEquipo() {
   dialog.value = false;
 }
 
-/* ELIMINAR */
-async function eliminar(id, nombre) {
-  if (confirm(`¿Eliminar equipo ${nombre}?`)) {
-    await equiposStore.remove(id);
-  }
+function abrirNuevo() {
+  modoEdicion.value = false;
+  form.value = { Id: 0, Nombre: "", Ciudad: "", UsuarioId: 0 };
+  dialog.value = true;
 }
 
-function cerrarDialog() {
-  dialog.value = false;
+function abrirEditar(id) {
+  const equipo = equiposStore.equipos.find(e => e.Id === id);
+  if (!equipo) return alert("Equipo no encontrado");
+
+  form.value = { ...equipo };
+  modoEdicion.value = true;
+  dialog.value = true;
+
+  cargarJugadoresEquipo(id);
+}
+
+// =====================================
+//            ELIMINAR JUGADOR
+// =====================================
+async function eliminarJugador(id) {
+  if (!confirm("¿Eliminar jugador?")) return;
+
+  await jugadoresStore.remove(id); // ← MISMO DELETE DEL LISTADO
+
+  await cargarJugadoresEquipo(equipoId); // ← REFRESCA LA LISTA
+}
+
+// =====================================
+//          EDITAR JUGADOR
+// =====================================
+function editarJugador(id) {
+  window.location.href = `/players_crud_edit?id=${id}`;
 }
 </script>
 
 
+
 <style>
-.team-card h3,
-.team-name,
-.v-btn,
-strong {
-  font-family: "Anton", sans-serif !important;
-  letter-spacing: 1px;
-}
-
-.team-card {
-  border-radius: 18px !important;
-  border: 3px solid #00000020 !important;
-  transition: transform .2s ease, box-shadow .2s ease;
-  position: relative;
-}
-
-.team-card:hover {
-  transform: scale(1.03);
-  box-shadow: 0px 6px 18px #00000040 !important;
-}
-
-.team-id {
-  position: absolute;
-  top: 6px;
-  right: 10px;
-  background: #ff3d0015;
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: bold;
-  color: #ff3d00;
-}
-
-.team-name {
-  text-align: center;
-  font-size: 1.3rem;
-  font-weight: bold !important;
-}
-
-.v-chip {
-  font-size: 0.85rem !important;
-}
-
-.v-btn:hover {
-  transform: translateY(-2px);
-}
+/* (tu CSS igual) */
 </style>

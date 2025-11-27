@@ -2,92 +2,99 @@
   <v-app>
     <v-main>
       <v-container class="mt-10">
-        
+
         <!-- TÍTULO -->
         <h1 class="text-center mb-8" style="font-family:'Anton'; letter-spacing:2px;">
           🏀 Gestión de Partidos
         </h1>
 
         <!-- CARD FORMULARIO -->
-        <v-card
-        class="pa-6 mb-8 form-card"
-        elevation="12"
-        style="
+        <v-card class="pa-6 mb-8 form-card" elevation="12" style="
             border-radius: 18px;
             background: linear-gradient(135deg, #ff8c00, #ff3d00);
             color: white;
-        "
-        >
+        ">
           <h2 class="text-center mb-4" style="font-family:'Anton';">Agregar / Editar Partido</h2>
 
           <v-row dense>
+            <!-- FECHA (picker) -->
             <v-col cols="12" sm="4">
-              <v-text-field
-                v-model="partido.Fecha"
-                label="Fecha"
-                type="datetime-local"
-                variant="solo"
-                prepend-inner-icon="mdi-calendar"
-              />
+              <v-menu v-model="menuFecha" :close-on-content-click="false" transition="scale-transition" offset-y>
+                <template #activator="{ props }">
+                  <v-text-field v-bind="props" v-model="fecha" label="Seleccionar fecha" readonly variant="solo"
+                    prepend-inner-icon="mdi-calendar" />
+                </template>
+
+                <v-card>
+                  <v-date-picker v-model="fecha" @update:model-value="onFechaSelect" />
+
+                  <v-card-actions>
+                    <v-spacer />
+                    <v-btn text color="red" @click="menuFecha = false">Cancelar</v-btn>
+                    <v-btn text color="primary" @click="aceptarFecha">Aceptar</v-btn>
+
+
+                    <!-- <v-btn text color="primary" @click="onFechaSelect(fecha)">Aceptar</v-btn> -->
+
+                  </v-card-actions>
+                </v-card>
+              </v-menu>
+            </v-col>
+
+            <!-- HORA (picker) -->
+            <v-col cols="12" sm="4">
+              <v-menu v-model="menuHora" :close-on-content-click="false" transition="scale-transition" offset-y>
+                <template #activator="{ props }">
+                  <v-text-field v-bind="props" v-model="hora" label="Seleccionar hora" readonly variant="solo"
+                    prepend-inner-icon="mdi-clock-outline" />
+                </template>
+
+                <v-card>
+                  <v-time-picker v-model="hora" format="24hr" @update:model-value="onHoraSelect" />
+
+                  <v-card-actions>
+                    <v-spacer />
+                    <v-btn text color="red" @click="menuHora = false">Cancelar</v-btn>
+                    <v-btn text color="primary" @click="aceptarHora">Aceptar</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-menu>
+            </v-col>
+
+            <!-- MUESTRA FECHA-HORA COMBINADA (readonly) -->
+            <v-col cols="12" sm="4">
+              <v-text-field :value="fechaHoraISO ? fechaHoraISO : ''" label="FechaHora ISO" readonly variant="solo"
+                prepend-inner-icon="mdi-calendar-clock" />
+            </v-col>
+
+            <!-- Equipo local / visitante / puntos / estado -->
+            <v-col cols="12" sm="4">
+              <v-text-field v-model="partido.Equipolocal" label="Equipo Local (ID)" type="number" variant="solo"
+                prepend-inner-icon="mdi-home" />
             </v-col>
 
             <v-col cols="12" sm="4">
-              <v-text-field
-                v-model="partido.Equipolocal"
-                label="Equipo Local (ID)"
-                type="number"
-                variant="solo"
-                prepend-inner-icon="mdi-home"
-              />
-            </v-col>
-
-            <v-col cols="12" sm="4">
-              <v-text-field
-                v-model="partido.EquipoVisitante"
-                label="Equipo Visitante (ID)"
-                type="number"
-                variant="solo"
-                prepend-inner-icon="mdi-airplane"
-              />
+              <v-text-field v-model="partido.EquipoVisitante" label="Equipo Visitante (ID)" type="number" variant="solo"
+                prepend-inner-icon="mdi-airplane" />
             </v-col>
 
             <v-col cols="6" sm="3">
-              <v-text-field
-                v-model="partido.PuntosLocal"
-                label="Puntos Local"
-                type="number"
-                variant="solo"
-                prepend-inner-icon="mdi-numeric"
-              />
+              <v-text-field v-model="partido.PuntosLocal" label="Puntos Local" type="number" variant="solo"
+                prepend-inner-icon="mdi-numeric" />
             </v-col>
 
             <v-col cols="6" sm="3">
-              <v-text-field
-                v-model="partido.PuntosVisitante"
-                label="Puntos Visitante"
-                type="number"
-                variant="solo"
-                prepend-inner-icon="mdi-numeric"
-              />
+              <v-text-field v-model="partido.PuntosVisitante" label="Puntos Visitante" type="number" variant="solo"
+                prepend-inner-icon="mdi-numeric" />
             </v-col>
 
             <v-col cols="12" sm="6">
-              <v-switch
-                v-model="partido.Status_Jugado"
-                label="¿Partido jugado?"
-                inset
-                color="black"
-              />
+              <v-switch v-model="partido.Status_Jugado" label="¿Partido jugado?" inset color="black" />
             </v-col>
           </v-row>
 
-          <v-btn
-            block
-            color="black"
-            class="mt-4 py-4"
-            style="border-radius: 12px;"
-            @click="partido.Id ? actualizarPartido() : insertarPartido()"
-          >
+          <v-btn block color="black" class="mt-4 py-4" style="border-radius: 12px;"
+            @click="partido.Id ? actualizarPartido() : insertarPartido()">
             {{ partido.Id ? "Actualizar Partido" : "Insertar Partido" }}
           </v-btn>
         </v-card>
@@ -99,13 +106,7 @@
           </h2>
 
           <v-row>
-            <v-col
-              cols="12"
-              sm="6"
-              md="4"
-              v-for="game in partidos"
-              :key="game.Id"
-            >
+            <v-col cols="12" sm="6" md="4" v-for="game in partidos" :key="game.Id">
               <v-card elevation="8" class="pa-4" style="border-radius:18px;">
                 <h3 class="text-center font-weight-bold">Partido #{{ game.Id }}</h3>
                 <p class="text-center">{{ formatFecha(game.Fecha) }}</p>
@@ -113,32 +114,22 @@
                 <v-divider class="my-2"></v-divider>
 
                 <p class="partido-info">
-                <strong>Local:</strong> {{ game.Equipolocal }} ({{ game.PuntosLocal }} pts)
+                  <strong>Local:</strong> {{ game.Equipolocal }} ({{ game.PuntosLocal }} pts)
                 </p>
 
                 <p class="partido-info">
-                <strong>Visitante:</strong> {{ game.EquipoVisitante }} ({{ game.PuntosVisitante }} pts)
+                  <strong>Visitante:</strong> {{ game.EquipoVisitante }} ({{ game.PuntosVisitante }} pts)
                 </p>
 
                 <p class="partido-info">
-                <strong>Estado:</strong> {{ game.Status_Jugado ? "Jugado" : "Pendiente" }}
+                  <strong>Estado:</strong> {{ game.Status_Jugado ? "Jugado" : "Pendiente" }}
                 </p>
 
-                <v-btn
-                  block
-                  color="orange"
-                  class="mt-2"
-                  @click="cargarPartido(game)"
-                >
+                <v-btn block color="blue" class="mt-2" variant="outlined" @click="cargarPartido(game)">
                   Editar
                 </v-btn>
 
-                <v-btn
-                  block
-                  color="red"
-                  class="mt-2"
-                  @click="eliminarPartido(game.Id)"
-                >
+                <v-btn block color="#b11320" class="mt-2" @click="eliminarPartido(game.Id)">
                   Eliminar
                 </v-btn>
               </v-card>
@@ -156,6 +147,12 @@ export default {
   name: "PartidosCrudView",
   data() {
     return {
+      // Pickers
+      fecha: null,     // yyyy-mm-dd
+      hora: null,      // HH:mm
+      menuFecha: false,
+      menuHora: false,
+
       partidos: [],
       partido: {
         Id: 0,
@@ -173,60 +170,187 @@ export default {
     this.obtenerPartidos();
   },
 
+  computed: {
+    // Genera la fecha final sin UTC
+    fechaHoraISO() {
+      if (!this.fecha || !this.hora) return null;
+      return `${this.fecha} ${this.hora}:00`;
+    }
+  },
+
   methods: {
-    // ---- OBTENER TODOS ----
+    // ---------------- PICKERS ----------------
+    onFechaSelect(value) {
+      if (!value) {
+        this.fecha = null;
+      } else if (typeof value === "string") {
+        this.fecha = value;
+      } else if (value instanceof Date) {
+        this.fecha = value.toISOString().split("T")[0];
+      } else {
+        this.fecha = String(value);
+      }
+      this.menuFecha = false;
+    },
+
+    onHoraSelect(value) {
+      if (!value) return;
+
+      if (typeof value === "string") {
+        const [h = "00", m = "00"] = value.split(":");
+        this.hora = `${h.padStart(2, "0")}:${m.padStart(2, "0")}`;
+      } else if (value instanceof Date) {
+        const hh = String(value.getHours()).padStart(2, "0");
+        const mm = String(value.getMinutes()).padStart(2, "0");
+        this.hora = `${hh}:${mm}`;
+      } else {
+        this.hora = String(value);
+      }
+
+      // ❌ NO cerrar aquí
+      // this.menuHora = false;
+    },
+
+    aceptarHora() {
+      // ya tienes HH:mm en this.hora
+      this.menuHora = false;
+    },
+    aceptarFecha() {
+      this.menuFecha = false;
+    },
+
+    // ---------------- OBTENER ----------------
     async obtenerPartidos() {
-      const res = await fetch("http://localhost:49986/APiLiga/Obtener/Partidos");
-      this.partidos = await res.json();
+      try {
+        const res = await fetch("http://localhost:49986/APiLiga/Obtener/Partidos");
+        this.partidos = await res.json();
+      } catch (e) {
+        console.error("Error al obtener partidos:", e);
+      }
     },
 
-    // ---- INSERTAR ----
+    // ---------------- INSERTAR ----------------
     async insertarPartido() {
-      await fetch("http://localhost:49986/APiLiga/Insertar/Partidos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(this.partido)
-      });
+      try {
+        if (this.fechaHoraISO) {
+          this.partido.Fecha = this.fechaHoraISO; // SIN UTC
+        } else {
+          this.partido.Fecha = "";
+        }
 
-      alert("Partido insertado 🏀🔥");
-      this.limpiarFormulario();
-      this.obtenerPartidos();
-    },
-
-    // ---- CARGAR PARA EDITAR ----
-    cargarPartido(data) {
-      this.partido = { ...data };
-    },
-
-    // ---- ACTUALIZAR ----
-    async actualizarPartido() {
-      await fetch(
-        `http://localhost:49986/APiLiga/Actualizar/Partido/${this.partido.Id}`,
-        {
-          method: "PUT",
+        const res = await fetch("http://localhost:49986/APiLiga/Insertar/Partidos", {
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(this.partido)
-        }
-      );
+        });
 
-      alert("Partido actualizado 🏀👌");
-      this.limpiarFormulario();
-      this.obtenerPartidos();
+        const text = await res.text();
+        console.log("RESPUESTA SERVER:", text);
+
+        if (!res.ok) {
+          alert("Error al insertar: " + text);
+          return;
+        }
+
+        alert("Partido insertado!");
+        this.limpiarFormulario();
+        this.obtenerPartidos();
+      } catch (e) {
+        console.error("ERROR GENERAL:", e);
+      }
     },
 
-    // ---- ELIMINAR ----
+    // ---------------- CARGAR PARA EDITAR ----------------
+    // ---------------- CARGAR PARA EDITAR ----------------
+    cargarPartido(data) {
+      this.partido = { ...data };
+
+      if (!data?.Fecha) {
+        this.fecha = null;
+        this.hora = null;
+        return;
+      }
+
+      let fechaTexto = data.Fecha;
+
+      // 1) Si viene con espacio: "YYYY-MM-DD HH:mm:ss"
+      if (fechaTexto.includes(" ")) {
+        const [f, horaCompleta] = fechaTexto.split(" ");
+        this.fecha = f;
+        this.hora = horaCompleta ? horaCompleta.substring(0, 5) : null;
+        return;
+      }
+
+      // 2) Si viene con T o Z → usar Date pero sin convertir a UTC
+      let fechaJS = new Date(fechaTexto);
+
+      if (!isNaN(fechaJS.getTime())) {
+        const yyyy = fechaJS.getFullYear();
+        const mm = String(fechaJS.getMonth() + 1).padStart(2, "0");
+        const dd = String(fechaJS.getDate()).padStart(2, "0");
+
+        const hh = String(fechaJS.getHours()).padStart(2, "0");
+        const min = String(fechaJS.getMinutes()).padStart(2, "0");
+
+        this.fecha = `${yyyy}-${mm}-${dd}`;
+        this.hora = `${hh}:${min}`;
+      } else {
+        // fallback si algo raro viene
+        this.fecha = null;
+        this.hora = null;
+      }
+    },
+
+
+    // ---------------- ACTUALIZAR ----------------
+    async actualizarPartido() {
+      try {
+        if (this.fechaHoraISO) {
+          this.partido.Fecha = this.fechaHoraISO; // SIN UTC
+        }
+
+        const res = await fetch(
+          `http://localhost:49986/APiLiga/Actualizar/Partido/${this.partido.Id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(this.partido)
+          }
+        );
+
+        const text = await res.text();
+        console.log("RESPUESTA ACTUALIZAR:", text);
+
+        if (!res.ok) {
+          alert("Error al actualizar: " + text);
+          return;
+        }
+
+        alert("Partido actualizado 🏀👌");
+        this.limpiarFormulario();
+        this.obtenerPartidos();
+      } catch (e) {
+        console.error("ERROR actualizarPartido:", e);
+      }
+    },
+
+    // ---------------- ELIMINAR ----------------
     async eliminarPartido(id) {
       if (!confirm("¿Deseas eliminar este partido?")) return;
 
-      await fetch(`http://localhost:49986/APiLiga/Eliminar/partido/${id}`, {
-        method: "DELETE"
-      });
+      try {
+        await fetch(`http://localhost:49986/APiLiga/Eliminar/partido/${id}`, {
+          method: "DELETE"
+        });
 
-      alert("Partido eliminado ❌");
-      this.obtenerPartidos();
+        alert("Partido eliminado ❌");
+        this.obtenerPartidos();
+      } catch (e) {
+        console.error("Error al eliminar:", e);
+      }
     },
 
-    // ---- LIMPIAR ----
+    // ---------------- LIMPIAR ----------------
     limpiarFormulario() {
       this.partido = {
         Id: 0,
@@ -237,20 +361,27 @@ export default {
         PuntosVisitante: 0,
         Status_Jugado: false
       };
+      this.fecha = null;
+      this.hora = null;
+      this.menuFecha = false;
+      this.menuHora = false;
     },
 
-    // ---- FORMATEAR FECHA ----
+    // ---------------- MOSTRAR FECHA ----------------
     formatFecha(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleString();
+      return dateString ?? "";
     }
+
   }
 };
 </script>
 
+
 <style scoped>
 /* ------------ TIPOGRAFÍA PRINCIPAL ------------ */
-h1, h2, h3,
+h1,
+h2,
+h3,
 .card-title,
 .text-center,
 strong,
@@ -342,5 +473,4 @@ h2 {
   border: 3px solid #00000030 !important;
   box-shadow: 0 6px 14px #00000040 !important;
 }
-
 </style>

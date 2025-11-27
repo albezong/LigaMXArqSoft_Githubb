@@ -32,7 +32,24 @@ export const actualizarJugador = async (id, jugador) => {
 
 // Eliminar jugador
 export const eliminarJugador = async (id) => {
-  const r = await api.delete(`/ApiLiga/Eliminar/Jugador/${id}`)
+  const r = await api.delete(`/ApiLiga/Eliminar/Jugadorr/${id}`)
   console.log("API ELIMINAR JUGADOR RESPUESTA:", r.data)
   return r.data
+}
+
+
+// ===============================
+//   JUGADORES - CRUD
+// ===============================
+
+
+// =============================================
+//   Obtener jugadores filtrados por equipo ID
+// =============================================
+export async function obtenerJugadoresPorEquipo(equipoId) {
+  const r = await api.get(`/ApiLiga/Obtener/Jugadoress`)
+  const filtrados = r.data.filter(j => j.EquipoId == equipoId)
+
+  console.log("JUGADORES POR EQUIPO:", filtrados)
+  return filtrados
 }

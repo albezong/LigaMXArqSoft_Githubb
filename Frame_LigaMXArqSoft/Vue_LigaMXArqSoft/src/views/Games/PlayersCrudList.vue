@@ -7,7 +7,7 @@
 
         <!-- BOTÓN AGREGAR JUGADOR -->
         <div class="d-flex justify-end mb-4">
-          <v-btn color="green" @click="$router.push('/players_crud_add')">
+          <v-btn color="#009929" @click="$router.push('/players_crud_add')">
             Agregar Jugador
           </v-btn>
         </div>
@@ -55,7 +55,7 @@
                     Editar
                   </v-btn>
 
-                  <v-btn size="small" color="red" @click="deletePlayer(player.Id)">
+                  <v-btn size="small" color="#b11320" @click="deletePlayer(player.Id)">
                     Eliminar
                   </v-btn>
                 </td>

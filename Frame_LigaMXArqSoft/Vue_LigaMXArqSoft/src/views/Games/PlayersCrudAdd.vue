@@ -21,29 +21,31 @@
           <v-form @submit.prevent="savePlayer">
 
             <v-text-field v-model="form.nombre" label="Nombre" prepend-inner-icon="mdi-account" required />
-
             <v-text-field v-model="form.apellido" label="Apellido" prepend-inner-icon="mdi-account-outline" required />
-
             <v-text-field v-model="form.posicion" label="Posición" prepend-inner-icon="mdi-basketball" required />
-
             <v-text-field v-model="form.numero" label="Número" type="number" prepend-inner-icon="mdi-pound" required />
-
             <v-text-field v-model="form.imagen" label="URL Imagen del Jugador" prepend-inner-icon="mdi-image"
               required />
 
-              
-              <v-btn v-if="editIndex !== -1" class="mt-3 ml-3" color="grey" @click="cancelEdit">
+            <!-- SELECT DE EQUIPOS (DEBE IR DENTRO DEL FORM) -->
+            <v-select v-model="form.equipoId" :items="equipos" item-title="Nombre" item-value="Id"
+              label="Selecciona un Equipo" prepend-inner-icon="mdi-shield" required class="mb-4" />
+
+            <!-- BOTONES (DENTRO DEL FORM) -->
+            <div class="mt-4">
+              <v-btn type="submit" color="primary">
+                {{ editIndex === -1 ? "Agregar" : "Guardar Cambios" }}
+              </v-btn>
+
+              <v-btn v-if="editIndex !== -1" class="ml-3" color="grey" @click="cancelEdit">
                 Cancelar
               </v-btn>
-            </v-form>
-            <!-- SELECT DE EQUIPOS -->
-            <v-select v-model="form.equipoId" :items="equipos" item-title="Nombre" item-value="Id"
-            label="Selecciona un Equipo" prepend-inner-icon="mdi-shield" required class="mb-4" />
-            <v-btn type="submit" color="primary" class="mt-3">
-              {{ editIndex === -1 ? "Agregar" : "Guardar Cambios" }}
-            </v-btn>
+            </div>
 
+          </v-form>
         </v-card>
+
+
       </v-container>
     </v-main>
   </v-app>
@@ -58,7 +60,7 @@ export default {
   data() {
     return {
       players: [],
-    equipos: [],
+      equipos: [],
 
       form: {
         id: 0,
@@ -76,25 +78,25 @@ export default {
   },
 
   created() {
-  this.getPlayers();
-  this.getEquipos();
+    this.getPlayers();
+    this.getEquipos();
   },
 
   methods: {
     async getEquipos() {
-  try {
-    const res = await axios.get("http://localhost:49986/ApiLiga/Obtener/equipos");
+      try {
+        const res = await axios.get("http://localhost:49986/ApiLiga/Obtener/equipos");
 
-    this.equipos = res.data.map(e => ({
-      Id: e.Id,
-      Nombre: e.Nombre
-    }));
+        this.equipos = res.data.map(e => ({
+          Id: e.Id,
+          Nombre: e.Nombre
+        }));
 
-    console.log("EQUIPOS CARGADOS:", this.equipos);
-  } catch (err) {
-    console.error("Error al obtener equipos:", err);
-  }
-},
+        console.log("EQUIPOS CARGADOS:", this.equipos);
+      } catch (err) {
+        console.error("Error al obtener equipos:", err);
+      }
+    },
 
     /* ============================
        GET: Obtener lista de jugadores

@@ -11,31 +11,17 @@
       <!-- Vista principal -->
       <v-container v-else class="py-10">
 
-        <h2 class="text-h4 font-weight-bold mb-6">Equipos</h2>
+        <h2 class="d-flex justify-center text-h4 font-weight-bold mb-6">Todos los equipos de la Liga BBMX</h2>
 
         <v-row dense>
-          <v-col
-            v-for="team in teams"
-            :key="team.Id"
-            cols="12"
-            sm="6"
-            md="4"
-            lg="3"
-          >
-            <v-card
-              elevation="8"
-              class="team-card pa-4"
-            >
+          <v-col v-for="team in teams" :key="team.Id" cols="12" sm="6" md="4" lg="3">
+
+            <v-card elevation="8" class="team-card pa-4" @click="verEquipo(team.Id)" style="cursor: pointer">
+
 
               <!-- Logo -->
               <div class="d-flex justify-center mb-4">
-                <v-img
-                  :src="getLogo(team.Nombre)"
-                  width="90"
-                  height="90"
-                  class="rounded-circle logo-shadow"
-                  cover
-                />
+                <v-img :src="getLogo(team.Nombre)" width="90" height="90" class="rounded-circle logo-shadow" cover />
               </div>
 
               <!-- Nombre -->
@@ -61,9 +47,16 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { useRouter } from "vue-router"
+
+const router = useRouter()
 
 const teams = ref([])
 const loading = ref(true)
+
+function verEquipo(id) {
+  router.push(`/teamscrud?id=${id}`)
+}
 
 // Diccionario de logos (nombre → archivo)
 const logos = {
@@ -121,12 +114,12 @@ onMounted(() => {
 
 .team-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0px 6px 20px rgba(0,0,0,0.20);
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.20);
 }
 
 /* Sombra al logo */
 .logo-shadow {
   border-radius: 50%;
-  box-shadow: 0px 4px 14px rgba(0,0,0,0.25);
+  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.25);
 }
 </style>

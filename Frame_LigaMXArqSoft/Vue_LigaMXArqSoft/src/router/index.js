@@ -12,6 +12,7 @@ import PlayersCrudAdd from "@/views/Games/PlayersCrudAdd.vue";
 import PlayersCrudList from "@/views/Games/PlayersCrudList.vue";
 import UpdateEquipoView from "@/views/Games/UpdateEquipoView.vue";
 import PlayersCrudEdit from "@/views/Games/PlayersCrudEdit.vue";
+import PartidosCrudView from "@/views/Games/PartidosCrudView.vue";
 
 const routes = [
   { path: "/", redirect: "/login" },
@@ -32,6 +33,8 @@ const routes = [
   { path: "/players_crud_edit", component: PlayersCrudEdit, meta: { requiresAuth: true }},
   { path: "/teamscrud", component: TeamsCrud, meta: { requiresAuth: true }},
   { path: "/update", component: UpdateEquipoView, meta: { requiresAuth: true }},
+  { path: "/partidos_crud_view", component: PartidosCrudView, meta: { requiresAuth: true }},
+
 ];
 
 const router = createRouter({
